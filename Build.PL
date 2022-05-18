@@ -17,8 +17,9 @@ my $builder = Module::Build->new(
         'Test::More' => '0',
     },
     requires => {
-        #'ABC'              => '1.6',
-        #'Foo::Bar::Module' => '5.0401',
+        'Pod::LOL'    => '0.02',
+        'Mojolicious' => '9.19',
+        'Term::ReadKey' => '2.38',
     },
     add_to_cleanup     => [ 'Pod-Query-*' ],
 );

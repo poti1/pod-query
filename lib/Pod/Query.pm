@@ -19,11 +19,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION       = '0.01';
+our $VERSION       = '0.02';
 our $DEBUG_TREE    = 0;
 our $DEBUG_FIND    = 0;
 our $DEBUG_INVERT  = 0;
