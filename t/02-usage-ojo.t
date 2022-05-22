@@ -19,7 +19,7 @@ my $class     = "MyClass1";
 
 my @cases = (
    {
-      name      => "Usage",
+      name      => "ojo",
       pod_class => $class,
       lol       => [
          [ "head1", "NAME" ],
