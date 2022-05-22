@@ -19,10 +19,11 @@ my $class     = "MyClass1";
 
 my @cases = (
    {
-      name          => "Empty",
-      pod_class     => $class++,
-      lol           => [],
-      expected_tree => [],
+      name                => "Empty",
+      pod_class           => $class++,
+      lol                 => [],
+      expected_tree       => [],
+      expected_find_title => "",
    },
    {
       name      => "Head1-Para",
@@ -47,6 +48,7 @@ my @cases = (
             "text" => ["NAME"]
          }
       ],
+      expected_find_title => "Example - Just an example"
    },
    {
       name      => "Head1-Para (no cut)",
@@ -71,6 +73,7 @@ my @cases = (
             "text" => ["NAME"]
          }
       ],
+      expected_find_title => "Example - Just an example"
    },
    {
       name          => "Head2",
@@ -82,6 +85,7 @@ my @cases = (
             "text" => ["Function1"]
          }
       ],
+      expected_find_title => "",
    },
    {
       name          => "Head2-Para",
@@ -99,6 +103,7 @@ my @cases = (
             "text" => ["Function1"]
          }
       ],
+      expected_find_title => "",
    },
    {
       name      => "Head2-Para-Verbatim",
@@ -124,6 +129,7 @@ my @cases = (
             "text" => ["Function1"]
          }
       ],
+      expected_find_title => "",
    },
 );
 
@@ -150,6 +156,7 @@ for my $case ( @cases ) {
    # Parse and compare
    is_deeply( $query->{path}, "$class_dir/$case->{pod_class}.pm", "path", );
    is_deeply( $query->{tree}, $case->{expected_tree},             "tree", );
+   is( $query->find_title(), $case->{expected_find_title}, "find_title" );
 }
 
 done_testing();
