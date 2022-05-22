@@ -242,7 +242,8 @@ sub _lol_to_tree ( $lol ) {
       return unless %$q;             # only if queue
       my $sub = $q->{sub};           # sub tags
       my $has = _has_head( $sub );
-      $q->{sub} = _lol_to_tree( $sub ) if $has;    # TODO: rename "sub" to "inside" or "inner".
+      $q->{sub} = _lol_to_tree( $sub )
+        if $has;    # TODO: rename "sub" to "inside" or "inner".
       push @main, $q;
       $q = {};
    };
@@ -355,7 +356,7 @@ Extracts the title information.
 =cut
 
 sub find_title ( $s ) {
-   $s->find(
+   scalar $s->find(
       {
          tag  => "head1",
          text => "NAME",
@@ -376,11 +377,10 @@ Extracts the complete method information.
 =cut
 
 sub find_method ( $s, $method ) {
-   my $FunctionCall = qr/ (?: \( [^()]* \) )? /x;
    $s->find(
       {
          tag       => qr/ ^ head \d $ /x,
-         text      => quotemeta( $method ) . $FunctionCall,
+         text      => quotemeta( $method ) . $s->_is_function_call,
          nth_group => 0,
          keep_all  => 1,
       },
@@ -395,11 +395,10 @@ Extracts the method summary.
 =cut
 
 sub find_method_summary ( $s, $method ) {
-   my $FunctionCall = qr/ (?: \( [^()]* \) )? /x;
-   $s->find(
+   scalar $s->find(
       {
          tag  => qr/ ^ head \d $ /x,
-         text => quotemeta( $method ) . $FunctionCall,
+         text => quotemeta( $method ) . $s->_is_function_call,
          nth  => 0,
       },
       {
@@ -410,9 +409,27 @@ sub find_method_summary ( $s, $method ) {
 }
 
 
+=head2 _is_function_call
+
+Regex for function call parenthesis.
+
+=cut
+
+sub _is_function_call {
+
+   # Optional "()".
+   qr/ (?:
+         \( [^()]* \)
+      )?
+   /x;
+}
+
+
 =head2 find_events
 
 Extracts a list of events with a description.
+
+Returns a list of key value pairs.
 
 =cut
 
@@ -438,6 +455,8 @@ sub find_events ( $s ) {
 =head2 find
 
 Generic extraction command.
+
+context sensitive!
 
    $pod->find(@sections)
 
