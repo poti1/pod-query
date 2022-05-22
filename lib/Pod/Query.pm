@@ -242,7 +242,7 @@ sub _lol_to_tree ( $lol ) {
       return unless %$q;             # only if queue
       my $sub = $q->{sub};           # sub tags
       my $has = _has_head( $sub );
-      $q->{sub} = _lol_to_tree( $sub ) if $has;
+      $q->{sub} = _lol_to_tree( $sub ) if $has;    # TODO: rename "sub" to "inside" or "inner".
       push @main, $q;
       $q = {};
    };
