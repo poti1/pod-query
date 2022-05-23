@@ -686,6 +686,99 @@ sub define_cases {
    ]
 }
 
+sub define_find_cases {
+   [
+      # tag       => "TAG",
+      # text      => "TEXT",
+      # keep      => 1,      # Must only be in last section.
+      # keep_all  => 1,
+      # nth       => 0,      # These options ...
+      # nth_group => 0,      #   are exclusive.
+
+      {
+         name          => "No find parameter",
+         expected_find => [],
+         error         => 1,
+      },
+      {
+         name          => "No find parameter hash input",
+         find          => [],
+         expected_find => [],
+         error         => 1,
+      },
+      {
+         name => "find_title",
+         find => [
+            {
+               tag  => "head1",
+               text => "NAME",
+               nth  => 0,
+            },
+            {
+               tag => "Para",
+               nth => 0,
+            },
+         ],
+         expected_find => [ "ojo - Fun one-liners with Mojo", ],
+      },
+      {
+         name => "find_method",
+         find => [
+            {
+               tag       => qr/ ^ head \d $ /x,
+               text      => "x",
+               nth_group => 0,
+               keep_all  => 1,
+            },
+         ],
+         expected_find => [
+            "x:",
+            "",
+            "  my \$dom = x('<div>Hello!</div>');",
+            "",
+            "  Turn HTML/XML input into Mojo::DOM object.",
+            "",
+"  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'",
+            "",
+         ],
+      },
+      {
+         name => "find_method_summary",
+         find => [
+            {
+               tag       => qr/ ^ head \d $ /x,
+               text      => "x",
+               nth_group => 0,
+            },
+            {
+               tag => qr/ (?: Data | Para ) /x,
+               nth => 0,
+            },
+         ],
+         expected_find => ["Turn HTML/XML input into Mojo::DOM object."],
+      },
+      {
+         name => "find_events",
+         find => [
+            {
+               tag  => qr/ ^ head \d $ /x,
+               text => "EVENTS",
+               nth  => 0,
+            },
+            {
+               tag  => qr/ ^ head \d $ /x,
+               keep => 1,
+            },
+            {
+               tag       => "Para",
+               nth_group => 0,
+            },
+         ],
+         expected_find => [],
+      },
+   ]
+}
+
 
 package main;
 use Mojo::Base -strict;

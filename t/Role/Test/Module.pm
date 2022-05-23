@@ -15,10 +15,12 @@ requires qw(
   expected_find_title
   expected_find_events
   define_cases
+  define_find_cases
 );
 
 sub run {
    my ( $obj, %parms ) = @_;
+   my $module = "Mojo::UserAgent";
 
    use_ok( "Pod::Query" ) || print "Bail out!\n";
    diag( "Testing Pod::Query $Pod::Query::VERSION, Perl $], $^X" );
@@ -63,7 +65,7 @@ sub run {
    # Methods.
    my $cases = $obj->define_cases;
    for my $case ( @$cases ) {
-      pass "=== Starting Mojo::UserAgent - method: $case->{method} ===";
+      pass "=== Starting $module - method: $case->{method} ===";
 
       # say dumper [ $query->find_method( $case->{method} ) ];
 
@@ -90,6 +92,30 @@ sub run {
          [ $case->{expected_find_method_summary} ],
          "find_method_summary($case->{method}) - list context"
       );
+   }
+
+   # find.
+   my $find_cases = $obj->define_find_cases;
+   for my $case ( @$find_cases ) {
+
+      # say dumper [ $query->find_method( $case->{method} ) ];
+      my $name     = "find - $case->{name}";
+      my $find     = $case->{find} // [];
+      my $expected = $case->{expected_find};
+
+      # say dumper { find => $find };
+      my $scalar_find = eval { $query->find( @$find ) };
+
+      if ( $@ ) {
+         $case->{error} ? pass( $name ) : fail( $name );
+         next;
+      }
+
+      is( $scalar_find, join( "\n", @$expected ), "$name - scalar context", );
+
+      my @list_find = $query->find( @$find );
+      say dumper \@list_find
+        unless is_deeply( \@list_find, $expected, "$name - list context", );
    }
 
    done_testing();

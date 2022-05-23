@@ -1516,6 +1516,107 @@ sub define_cases {
    ]
 }
 
+sub define_find_cases {
+   [
+      # tag       => "TAG",
+      # text      => "TEXT",
+      # keep      => 1,      # Must only be in last section.
+      # keep_all  => 1,
+      # nth       => 0,      # These options ...
+      # nth_group => 0,      #   are exclusive.
+
+      {
+         name          => "No find parameter",
+         expected_find => [],
+         error         => 1,
+      },
+      {
+         name          => "No find parameter hash input",
+         find          => [],
+         expected_find => [],
+         error         => 1,
+      },
+      {
+         name => "find_title",
+         find => [
+            {
+               tag  => "head1",
+               text => "NAME",
+               nth  => 0,
+            },
+            {
+               tag => "Para",
+               nth => 0,
+            },
+         ],
+         expected_find => [
+            "Mojo::UserAgent - Non-blocking I/O HTTP and WebSocket user agent",
+         ],
+      },
+      {
+         name => "find_method",
+         find => [
+            {
+               tag       => qr/ ^ head \d $ /x,
+               text      => "get",
+               nth_group => 0,
+               keep_all  => 1,
+            },
+         ],
+         expected_find => [
+            "get:",
+            "",
+"  my \$tx = \$ua->get('example.com');\n  my \$tx = \$ua->get('http://example.com' => {Accept => '*/*'} => 'Content!');\n  my \$tx = \$ua->get('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$tx = \$ua->get('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});",
+            "",
+"  Perform blocking GET request and return resulting\n  Mojo::Transaction::HTTP object, takes the same\n  arguments as \"tx\" in Mojo::UserAgent::Transactor\n  (except for the GET method, which is implied). You can\n  also append a callback to perform requests\n  non-blocking.",
+            "",
+"  \$ua->get('http://example.com' => json => {a => 'b'} => sub (\$ua, \$tx) { say \$tx->result->body });\n  Mojo::IOLoop->start unless Mojo::IOLoop->is_running;",
+            ""
+         ],
+      },
+      {
+         name => "find_method_summary",
+         find => [
+            {
+               tag       => qr/ ^ head \d $ /x,
+               text      => "get",
+               nth_group => 0,
+            },
+            {
+               tag => qr/ (?: Data | Para ) /x,
+               nth => 0,
+            },
+         ],
+         expected_find => [
+"Perform blocking GET request and return resulting Mojo::Transaction::HTTP object, takes the same arguments as \"tx\" in Mojo::UserAgent::Transactor (except for the GET method, which is implied). You can also append a callback to perform requests non-blocking."
+         ],
+      },
+      {
+         name => "find_events",
+         find => [
+            {
+               tag  => qr/ ^ head \d $ /x,
+               text => "EVENTS",
+               nth  => 0,
+            },
+            {
+               tag  => qr/ ^ head \d $ /x,
+               keep => 1,
+            },
+            {
+               tag       => "Para",
+               nth_group => 0,
+            },
+         ],
+         expected_find => [
+            "prepare",
+"Emitted whenever a new transaction is being prepared, before relative URLs are rewritten and cookies added. This includes automatically prepared proxy CONNECT requests and followed redirects.",
+            "start",
+"Emitted whenever a new transaction is about to start. This includes automatically prepared proxy CONNECT requests and followed redirects."
+         ],
+      },
+   ]
+}
 
 package main;
 use Mojo::Base -strict;

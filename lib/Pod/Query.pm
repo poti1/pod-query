@@ -20,11 +20,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION       = '0.04';
+our $VERSION       = '0.05';
 our $DEBUG_TREE    = 0;
 our $DEBUG_FIND    = 0;
 our $DEBUG_INVERT  = 0;
@@ -34,11 +34,12 @@ our $MOCK_SECTIONS = 0;
 
 
 has [
-   qw/ path lol
-     tree
-     title
-     events
-     /
+   qw/
+      path lol
+      tree
+      title
+      events
+   /
 ];
 
 =head1 SYNOPSIS
@@ -493,7 +494,7 @@ sub find ( $s, @find_sections ) {
       #    keep_all => 1,
       #    nth      => 1,
       # },
-   ) if $MOCK_SECTIONS;
+   ) if $MOCK_SECTIONS;    # TODO: Remove later.
 
    _check_sections( \@find_sections );
    _set_section_defaults( \@find_sections );
@@ -549,7 +550,10 @@ sub _check_sections ( $sections ) {
          );
    ERROR
 
-   die "$error_message" if grep { ref() ne ref {} } @$sections;
+   die "$error_message" if
+      not $sections
+      or not @$sections
+      or grep { ref() ne ref {} } @$sections;
 
    # keep_all should only be in the last section
    my $last = $#$sections;
@@ -599,14 +603,13 @@ sub _set_section_defaults ( $sections ) {
       }
 
       # Range Options
-      my $zero     = "0 but true";
       my $is_digit = qr/ ^ -?\d+ $ /x;
       for ( qw/ nth nth_group / ) {
          my $v = $section->{$_};
          if ( defined $v and $v =~ /$is_digit/ ) {
-            $v ||= $zero;
-            my $end  = ( $v >= 0 ) ? "pos" : "neg";
-            my $name = "_${_}_$end";
+            $v ||= "0 but true";
+            my $end  = ( $v >= 0 ) ? "pos" : "neg";   # Set negative or
+            my $name = "_${_}_$end";                  # postive form.
             $section->{$name} = $v;
          }
       }
@@ -651,14 +654,15 @@ sub _find ( $need, @groups ) {
    my $text        = $need->{text};
    my $keep        = $need->{keep};
    my $nth         = $need->{nth};
-   my $nth_p       = $need->{_nth_pos};
-   my $nth_n       = $need->{_nth_neg};
+   my $nth_p       = $need->{_nth_pos};         # Simplify code by already
+   my $nth_n       = $need->{_nth_neg};         # knowing if neg or pos.
    my $nth_group   = $need->{nth_group};
-   my $nth_group_p = $need->{_nth_grou_pos};
+   my $nth_group_p = $need->{_nth_grou_pos};    # Set in _set_section_defaults.
    my $nth_group_n = $need->{_nth_grou_neg};
    my @found;
 
- GROUP: for my $group ( @groups ) {
+   GROUP:
+   for my $group ( @groups ) {
       my @tries = ( $group );
       my $prev  = $group->{prev} // [];
       $prev = [@$prev];    # shallow copy
