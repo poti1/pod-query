@@ -1917,6 +1917,85 @@ sub define_find_cases {
 "Code for nth needs to be restructured to make sure nth really means nth found.",
       },
 
+      # Nth vs Nth_group.
+      {
+         name => "find attributes",
+         find => [
+            {
+               tag  => qr/ ^ head \d $ /x,
+               text => "ATTRIBUTES",
+               nth  => 0,
+            },
+            {
+               tag  => qr/ ^ head \d $ /x,
+               keep => 1,
+            },
+            {
+               tag       => "Para",
+               nth_group => 1,
+            },
+         ],
+         expected_find => [
+            "ca",
+"Path to TLS certificate authority file used to verify the peer certificate, defaults to the value of the MOJO_CA_FILE environment variable.",
+            "cert",
+"Path to TLS certificate file, defaults to the value of the MOJO_CERT_FILE environment variable.",
+            "connect_timeout",
+"Maximum amount of time in seconds establishing a connection may take before getting canceled, defaults to the value of the MOJO_CONNECT_TIMEOUT environment variable or 10.",
+            "cookie_jar",
+"Cookie jar to use for requests performed by this user agent, defaults to a Mojo::UserAgent::CookieJar object.",
+            "inactivity_timeout",
+"Maximum amount of time in seconds a connection can be inactive before getting closed, defaults to the value of the MOJO_INACTIVITY_TIMEOUT environment variable or 40. Setting the value to 0 will allow connections to be inactive indefinitely.",
+            "insecure",
+"Do not require a valid TLS certificate to access HTTPS/WSS sites, defaults to the value of the MOJO_INSECURE environment variable.",
+            "ioloop",
+"Event loop object to use for blocking I/O operations, defaults to a Mojo::IOLoop object.",
+            "key",
+"Path to TLS key file, defaults to the value of the MOJO_KEY_FILE environment variable.",
+            "max_connections",
+"Maximum number of keep-alive connections that the user agent will retain before it starts closing the oldest ones, defaults to 5. Setting the value to 0 will prevent any connections from being kept alive.",
+            "max_redirects",
+"Maximum number of redirects the user agent will follow before it fails, defaults to the value of the MOJO_MAX_REDIRECTS environment variable or 0.",
+            "max_response_size",
+"Maximum response size in bytes, defaults to the value of \"max_message_size\" in Mojo::Message::Response. Setting the value to 0 will allow responses of indefinite size. Note that increasing this value can also drastically increase memory usage, should you for example attempt to parse an excessively large response body with the methods \"dom\" in Mojo::Message or \"json\" in Mojo::Message.",
+            "proxy",
+            "Proxy manager, defaults to a Mojo::UserAgent::Proxy object.",
+            "request_timeout",
+"Maximum amount of time in seconds establishing a connection, sending the request and receiving a whole response may take before getting canceled, defaults to the value of the MOJO_REQUEST_TIMEOUT environment variable or 0. Setting the value to 0 will allow the user agent to wait indefinitely. The timeout will reset for every followed redirect.",
+            "server",
+"Application server relative URLs will be processed with, defaults to a Mojo::UserAgent::Server object.",
+            "socket_options",
+"Additional options for IO::Socket::IP when opening new connections.",
+            "transactor",
+"Transaction builder, defaults to a Mojo::UserAgent::Transactor object.",
+         ],
+      },
+      {
+         name => "find attributes",
+         find => [
+            {
+               tag  => qr/ ^ head \d $ /x,
+               text => "ATTRIBUTES",
+               nth  => 0,
+            },
+            {
+               tag => qr/ ^ head \d $ /x,
+            },
+         ],
+         expected_find => [
+            "ca",                 "cert",
+            "connect_timeout",    "cookie_jar",
+            "inactivity_timeout", "insecure",
+            "ioloop",             "key",
+            "max_connections",    "max_redirects",
+            "max_response_size",  "proxy",
+            "request_timeout",    "server",
+            "socket_options",     "transactor",
+         ],
+         debug => "find",
+         skip  => "Need to restructure _find()",
+      },
+
       # Other.
       {
          name => "find tag=Para, text=Any,First,Literal",

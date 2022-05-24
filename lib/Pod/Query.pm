@@ -24,22 +24,21 @@ Version 0.06
 
 =cut
 
-our $VERSION       = '0.06';
-our $DEBUG_TREE    = 0;
-our $DEBUG_FIND    = 0;
-our $DEBUG_INVERT  = 0;
-our $DEBUG_RENDER  = 0;
-our $MOCK_ROOT     = 0;
-our $MOCK_SECTIONS = 0;
+our $VERSION      = '0.06';
+our $DEBUG_TREE   = 0;
+our $DEBUG_FIND   = 0;
+our $DEBUG_INVERT = 0;
+our $DEBUG_RENDER = 0;
+our $MOCK_ROOT    = 0;
 
 
 has [
    qw/
-      path lol
-      tree
-      title
-      events
-   /
+     path lol
+     tree
+     title
+     events
+     /
 ];
 
 =head1 SYNOPSIS
@@ -119,20 +118,7 @@ sub new ( $class, $pod_class, $path_only = 0 ) {
 
    return $s if $path_only;
 
-   my $lol = do {
-      if ( $MOCK_ROOT ) {
-         _mock_root();
-      }
-      else {
-         my $parser = Pod::LOL->new;
-
-         # Normally =for and =begin would otherwise be skipped.
-         $parser->accept_targets( '*' );
-
-         $parser->parse_file( $s->path )->{root};
-      }
-   };
-
+   my $lol = $MOCK_ROOT ? _mock_root() : Pod::LOL->new_root( $s->path );
    $lol = _flatten_for_tags( $lol );
 
    $s->lol( $lol );
@@ -463,11 +449,12 @@ context sensitive!
 
    Where each section can contain:
    {
-      tag      => "TAG_NAME",     # Find all matching tags.
-      text     => "TEXT_NAME",    # Find all matching texts.
-      keep     => 1,              # Capture the text.
-      keep_all => 1,              # Capture entire section.
-      nth      => 0,              # Use only the nth match.
+      tag       => "TAG_NAME",    # Find all matching tags.
+      text      => "TEXT_NAME",   # Find all matching texts.
+      keep      => 1,             # Capture the text.
+      keep_all  => 1,             # Capture entire section.
+      nth       => 0,             # Use only the nth match.
+      nth_group => 0,             # Use only the nth matching group.
    }
 
    # Return contents of entire head section:
@@ -485,16 +472,6 @@ context sensitive!
 =cut
 
 sub find ( $s, @find_sections ) {
-   @find_sections = (
-
-      # {
-      #    tag      => "Para",
-      #    text     => "SKIP1",
-      #    keep     => 1,
-      #    keep_all => 1,
-      #    nth      => 1,
-      # },
-   ) if $MOCK_SECTIONS;    # TODO: Remove later.
 
    _check_sections( \@find_sections );
    _set_section_defaults( \@find_sections );
@@ -513,9 +490,6 @@ sub find ( $s, @find_sections ) {
    if ( not $kept_all ) {
       @tree = _invert( @tree );
    }
-
-   # say "tree= ", dumper \@tree;
-   # exit;
 
    _render( $kept_all, @tree );
 }
@@ -550,10 +524,10 @@ sub _check_sections ( $sections ) {
          );
    ERROR
 
-   die "$error_message" if
-      not $sections
-      or not @$sections
-      or grep { ref() ne ref {} } @$sections;
+   die "$error_message"
+     if not $sections
+     or not @$sections
+     or grep { ref() ne ref {} } @$sections;
 
    # keep_all should only be in the last section
    my $last = $#$sections;
@@ -608,8 +582,8 @@ sub _set_section_defaults ( $sections ) {
          my $v = $section->{$_};
          if ( defined $v and $v =~ /$is_digit/ ) {
             $v ||= "0 but true";
-            my $end  = ( $v >= 0 ) ? "pos" : "neg";   # Set negative or
-            my $name = "_${_}_$end";                  # postive form.
+            my $end  = ( $v >= 0 ) ? "pos" : "neg";    # Set negative or
+            my $name = "_${_}_$end";                   # postive form.
             $section->{$name} = $v;
          }
       }
@@ -641,27 +615,24 @@ sub _get_heads_regex ( $num ) {
 
 Lower level find command.
 
+TODO: Need to clean this up and possibly restructure.
+
 =cut
 
-sub _find ( $need, @groups ) {                  # TODO: Cleanup and make more readable.
+sub _find ( $need, @groups ) {
    if ( $DEBUG_FIND ) {
       say "\n_FIND()";
       say "need:   ", dumper $need;
       say "groups: ", dumper \@groups;
    }
 
-   my $tag         = $need->{tag};
-   my $text        = $need->{text};
-   my $keep        = $need->{keep};
-   my $nth         = $need->{nth};
    my $nth_p       = $need->{_nth_pos};         # Simplify code by already
    my $nth_n       = $need->{_nth_neg};         # knowing if neg or pos.
-   my $nth_group   = $need->{nth_group};
    my $nth_group_p = $need->{_nth_grou_pos};    # Set in _set_section_defaults.
    my $nth_group_n = $need->{_nth_grou_neg};
    my @found;
 
-   GROUP:
+ GROUP:
    for my $group ( @groups ) {
       my @tries = ( $group );
       my $prev  = $group->{prev} // [];
@@ -673,38 +644,36 @@ sub _find ( $need, @groups ) {                  # TODO: Cleanup and make more re
          say "group:  ", dumper $group;
       }
 
-      TRY:
+    TRY:
       while ( my $try = shift @tries ) {
          $DEBUG_FIND
            and say "\nTrying: try=", dumper $try;
 
-         my $_tag      = $try->{tag};
-         my ( $_text ) = $try->{text}->@*;
-         my $_sub      = $try->{sub};
-         my $_keep     = $try->{keep};
+         my ( $try_text ) = $try->{text}->@*;    # TODO: only the first text?
 
-         if ( defined $_keep ) {             # TODO; Why empty block?
+         if ( defined $try->{keep} ) {           # TODO; Why empty block?
             $DEBUG_FIND
               and say "ENFORCING: keep";
          }
-         elsif ($_tag =~ /$tag/
-            and $_text =~ /$text/ )
+         elsif ($try->{tag} =~ /$need->{tag}/
+            and $try_text =~ /$need->{text}/ )
          {
             $DEBUG_FIND
-              and say "Found:  tag=$_tag, text=$_text";
-            push @found_in_group,
-              {
-               %$try,               # Copy current search options.
-               prev => $prev,       # Need this for the inversion step.
-               keep => $keep,       # Remember for later if we need to keep this.
-              };
+              and say "Found:  tag=$try->{tag}, text=$try_text";
+            push @found_in_group, {
+               %$try,                  # Copy current search options.
+               prev => $prev,          # Need this for the inversion step.
+               keep => $need->{keep}
+               ,    # Remember for later if we need to keep this.
+            };
 
             # Specific match (positive)
             $DEBUG_FIND
-               and say "nth=$nth, nth_group=$nth_group, qsize=@{[ scalar @found_in_group ]}";
+              and say
+"nth=$need->{nth}, nth_group=$need->{nth_group}, qsize=@{[ scalar @found_in_group ]}";
             if ( $nth_p and @found_in_group > $nth_p ) {
                $DEBUG_FIND
-                 and say "ENFORCING: nth=$nth";
+                 and say "ENFORCING: nth=$nth_p";
                @found = $found_in_group[$nth_p];
                last GROUP;
             }
@@ -712,21 +681,21 @@ sub _find ( $need, @groups ) {                  # TODO: Cleanup and make more re
             # Specific group match (positive)
             elsif ( $nth_group_p and @found_in_group > $nth_group_p ) {
                $DEBUG_FIND
-                 and say "ENFORCING: nth_group=$nth_group";
+                 and say "ENFORCING: nth_group=$nth_group_p";
                @found_in_group = $found_in_group[$nth_group_p];
                last TRY;
             }
          }
 
-         if ( $_sub and not @found_in_group ) {
+         if ( $try->{sub} and not @found_in_group ) {
             $DEBUG_FIND
               and say "Got sub and nothing yet in queue";
-            unshift @tries, @$_sub;
-            if ( $_keep and not $locked_prev++ ) {
+            unshift @tries, $try->{sub}->@*;
+            if ( $try->{keep} and not $locked_prev++ ) {
                unshift @$prev,
                  {
-                  tag  => $_tag,
-                  text => [$_text],
+                  tag  => $try->{tag},
+                  text => [$try_text],
                  };
                $DEBUG_FIND
                  and say "prev changed: ", dumper $prev;
@@ -749,7 +718,7 @@ sub _find ( $need, @groups ) {                  # TODO: Cleanup and make more re
    # Specific match (negative)
    if ( $nth_n and @found >= abs $nth_n ) {
       $DEBUG_FIND
-        and say "ENFORCING: nth=$nth";
+        and say "ENFORCING: nth=$nth_n";
       @found = $found[$nth_n];
    }
 
@@ -1010,6 +979,14 @@ Tim Potapov, C<< <tim.potapov[AT]gmail.com> >>
 =head1 BUGS
 
 Please report any bugs or feature requests to L<https://github.com/poti1/pod-query/issues>.
+
+
+=head1 CAVEAT
+
+
+These options to _find() appear to only be currently working if set to o or -1:
+   nth
+   nth_group
 
 
 =head1 SUPPORT
