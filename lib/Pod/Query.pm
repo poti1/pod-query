@@ -20,11 +20,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION       = '0.05';
+our $VERSION       = '0.06';
 our $DEBUG_TREE    = 0;
 our $DEBUG_FIND    = 0;
 our $DEBUG_INVERT  = 0;
@@ -538,12 +538,12 @@ sub _check_sections ( $sections ) {
          $pod->find(
             # section1
             {
-               tag       => "TAG",
-               text      => "TEXT",
+               tag       => "TAG",  # Search to look for.
+               text      => "TEXT", # Text of the tag to find.
                keep      => 1,      # Must only be in last section.
-               keep_all  => 1,
-               nth       => 0,      # These options ...
-               nth_group => 0,      #   are exclusive.
+               keep_all  => 1,      # Keep this tag and sub tags.
+               nth       => 0,      # Stop searching after find so many matches.
+               nth_group => 0,      # 
             },
             # ...
             # sectionN
@@ -643,7 +643,7 @@ Lower level find command.
 
 =cut
 
-sub _find ( $need, @groups ) {
+sub _find ( $need, @groups ) {                  # TODO: Cleanup and make more readable.
    if ( $DEBUG_FIND ) {
       say "\n_FIND()";
       say "need:   ", dumper $need;
@@ -667,12 +667,13 @@ sub _find ( $need, @groups ) {
       my $prev  = $group->{prev} // [];
       $prev = [@$prev];    # shallow copy
       my $locked_prev = 0;
-      my @q;
+      my @found_in_group;
       if ( $DEBUG_FIND ) {
          say "\nprev: ", dumper $prev;
          say "group:  ", dumper $group;
       }
 
+      TRY:
       while ( my $try = shift @tries ) {
          $DEBUG_FIND
            and say "\nTrying: try=", dumper $try;
@@ -682,7 +683,7 @@ sub _find ( $need, @groups ) {
          my $_sub      = $try->{sub};
          my $_keep     = $try->{keep};
 
-         if ( defined $_keep ) {
+         if ( defined $_keep ) {             # TODO; Why empty block?
             $DEBUG_FIND
               and say "ENFORCING: keep";
          }
@@ -691,31 +692,33 @@ sub _find ( $need, @groups ) {
          {
             $DEBUG_FIND
               and say "Found:  tag=$_tag, text=$_text";
-            push @q,
+            push @found_in_group,
               {
-               %$try,
-               prev => $prev,
-               keep => $keep,
+               %$try,               # Copy current search options.
+               prev => $prev,       # Need this for the inversion step.
+               keep => $keep,       # Remember for later if we need to keep this.
               };
 
             # Specific match (positive)
-            if ( $nth_p and @q > $nth_p ) {
+            $DEBUG_FIND
+               and say "nth=$nth, nth_group=$nth_group, qsize=@{[ scalar @found_in_group ]}";
+            if ( $nth_p and @found_in_group > $nth_p ) {
                $DEBUG_FIND
                  and say "ENFORCING: nth=$nth";
-               @found = $q[$nth_p];
+               @found = $found_in_group[$nth_p];
                last GROUP;
             }
 
             # Specific group match (positive)
-            elsif ( $nth_group_p and @q > $nth_group_p ) {
+            elsif ( $nth_group_p and @found_in_group > $nth_group_p ) {
                $DEBUG_FIND
                  and say "ENFORCING: nth_group=$nth_group";
-               @q = $q[$nth_group_p];
-               last;
+               @found_in_group = $found_in_group[$nth_group_p];
+               last TRY;
             }
          }
 
-         if ( $_sub and not @q ) {
+         if ( $_sub and not @found_in_group ) {
             $DEBUG_FIND
               and say "Got sub and nothing yet in queue";
             unshift @tries, @$_sub;
@@ -734,13 +737,13 @@ sub _find ( $need, @groups ) {
       }
 
       # Specific group match (negative)
-      if ( $nth_group_n and @q >= abs $nth_group_n ) {
+      if ( $nth_group_n and @found_in_group >= abs $nth_group_n ) {
          $DEBUG_FIND
            and say "ENFORCING: nth_group_n=$nth_group_n";
-         @q = $q[$nth_group_n];
+         @found_in_group = $found_in_group[$nth_group_n];
       }
 
-      push @found, splice @q if @q;
+      push @found, splice @found_in_group if @found_in_group;
    }
 
    # Specific match (negative)

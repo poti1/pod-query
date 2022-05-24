@@ -97,6 +97,15 @@ sub run {
    # find.
    my $find_cases = $obj->define_find_cases;
    for my $case ( @$find_cases ) {
+      my $debug = $case->{debug} // '';
+      my $skip  = $case->{skip}  // '';
+
+      if ( $skip ) {
+       SKIP: {
+            skip $skip;
+         }
+         next;
+      }
 
       # say dumper [ $query->find_method( $case->{method} ) ];
       my $name     = "find - $case->{name}";
@@ -113,9 +122,12 @@ sub run {
 
       is( $scalar_find, join( "\n", @$expected ), "$name - scalar context", );
 
-      my @list_find = $query->find( @$find );
-      say dumper \@list_find
-        unless is_deeply( \@list_find, $expected, "$name - list context", );
+      {
+         local $Pod::Query::DEBUG_FIND = 1 if $debug eq "find";
+         my @list_find = $query->find( @$find );
+         say dumper \@list_find
+           unless is_deeply( \@list_find, $expected, "$name - list context", );
+      };
    }
 
    done_testing();

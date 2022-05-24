@@ -1,3 +1,7 @@
 Add more tests.
    - Test the different find() inputs.
+
 Update pod
+   - Explain each of the find options (like "nth_group")
+
+Sort functions by name.
