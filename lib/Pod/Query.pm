@@ -366,10 +366,10 @@ Extracts the complete method information.
 sub find_method ( $s, $method ) {
    $s->find(
       {
-         tag       => qr/ ^ head \d $ /x,
-         text      => quotemeta( $method ) . $s->_is_function_call,
-         nth_group => 0,
-         keep_all  => 1,
+         tag      => qr/ ^ head \d $ /x,
+         text     => quotemeta( $method ) . $s->_is_function_call,
+         nth      => 0,
+         keep_all => 1,
       },
    );
 }
@@ -517,7 +517,7 @@ sub _check_sections ( $sections ) {
                keep      => 1,      # Must only be in last section.
                keep_all  => 1,      # Keep this tag and sub tags.
                nth       => 0,      # Stop searching after find so many matches.
-               nth_group => 0,      # 
+               nth_group => 0,      # Nth only in the current group.
             },
             # ...
             # sectionN
@@ -634,81 +634,67 @@ sub _find ( $need, @groups ) {
 
  GROUP:
    for my $group ( @groups ) {
-      my @tries = ( $group );
-      my $prev  = $group->{prev} // [];
-      $prev = [@$prev];    # shallow copy
+      my @tries = ( $group );                  # Assume single group to process.
+      my @prev  = @{ $group->{prev} // [] };
       my $locked_prev = 0;
       my @found_in_group;
       if ( $DEBUG_FIND ) {
-         say "\nprev: ", dumper $prev;
+         say "\nprev: ", dumper \@prev;
          say "group:  ", dumper $group;
       }
 
     TRY:
-      while ( my $try = shift @tries ) {
-         $DEBUG_FIND
-           and say "\nTrying: try=", dumper $try;
+      while ( my $try = shift @tries ) {   # Can add to this queue if a sub tag.
+         say "\nTrying: try=", dumper $try if $DEBUG_FIND;
 
-         my ( $try_text ) = $try->{text}->@*;    # TODO: only the first text?
+         my ( $try_text ) = $try->{text}->@*;   # TODO: why only the first text?
 
-         if ( defined $try->{keep} ) {           # TODO; Why empty block?
-            $DEBUG_FIND
-              and say "ENFORCING: keep";
+         if ( defined $try->{keep} ) {          # TODO; Why empty block?
+            say "ENFORCING: keep" if $DEBUG_FIND;
          }
          elsif ($try->{tag} =~ /$need->{tag}/
             and $try_text =~ /$need->{text}/ )
          {
-            $DEBUG_FIND
-              and say "Found:  tag=$try->{tag}, text=$try_text";
+            say "Found:  tag=$try->{tag}, text=$try_text" if $DEBUG_FIND;
             push @found_in_group, {
-               %$try,                  # Copy current search options.
-               prev => $prev,          # Need this for the inversion step.
-               keep => $need->{keep}
-               ,    # Remember for later if we need to keep this.
+               %$try,                    # Copy current search options.
+               prev => \@prev,           # Need this for the inversion step.
+               keep => $need->{keep},    # Remember for later.
             };
 
             # Specific match (positive)
-            $DEBUG_FIND
-              and say
-"nth=$need->{nth}, nth_group=$need->{nth_group}, qsize=@{[ scalar @found_in_group ]}";
             if ( $nth_p and @found_in_group > $nth_p ) {
-               $DEBUG_FIND
-                 and say "ENFORCING: nth=$nth_p";
-               @found = $found_in_group[$nth_p];
+               say "ENFORCING: nth=$nth_p" if $DEBUG_FIND;
+               @found = $found_in_group[$nth_p];    # Big match
                last GROUP;
             }
 
             # Specific group match (positive)
             elsif ( $nth_group_p and @found_in_group > $nth_group_p ) {
-               $DEBUG_FIND
-                 and say "ENFORCING: nth_group=$nth_group_p";
-               @found_in_group = $found_in_group[$nth_group_p];
+               say "ENFORCING: nth_group=$nth_group_p" if $DEBUG_FIND;
+               @found_in_group = $found_in_group[$nth_group_p];    # Submatch
                last TRY;
             }
          }
 
          if ( $try->{sub} and not @found_in_group ) {
-            $DEBUG_FIND
-              and say "Got sub and nothing yet in queue";
-            unshift @tries, $try->{sub}->@*;
+            say "Got sub and nothing yet in queue" if $DEBUG_FIND;
+            unshift @tries, $try->{sub}->@*;    # Process sub tags.
             if ( $try->{keep} and not $locked_prev++ ) {
-               unshift @$prev,
+               unshift @prev,
                  {
                   tag  => $try->{tag},
                   text => [$try_text],
                  };
-               $DEBUG_FIND
-                 and say "prev changed: ", dumper $prev;
+               say "prev changed: ", dumper \@prev if $DEBUG_FIND;
             }
-            $DEBUG_FIND
-              and say "locked_prev: $locked_prev";
+            say "locked_prev: $locked_prev" if $DEBUG_FIND;
          }
       }
 
       # Specific group match (negative)
       if ( $nth_group_n and @found_in_group >= abs $nth_group_n ) {
-         $DEBUG_FIND
-           and say "ENFORCING: nth_group_n=$nth_group_n";
+         say "ENFORCING: nth_group_n=$nth_group_n" if $DEBUG_FIND;
          @found_in_group = $found_in_group[$nth_group_n];
       }
 
@@ -717,13 +703,12 @@ sub _find ( $need, @groups ) {
 
    # Specific match (negative)
    if ( $nth_n and @found >= abs $nth_n ) {
-      $DEBUG_FIND
-        and say "ENFORCING: nth=$nth_n";
+      say "ENFORCING: nth=$nth_n" if $DEBUG_FIND;
       @found = $found[$nth_n];
    }
 
-   $DEBUG_FIND
-     and say "found: ", dumper \@found;
+   say "found: ", dumper \@found if $DEBUG_FIND;
+
    @found;
 }
 

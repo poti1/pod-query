@@ -1554,10 +1554,10 @@ sub define_find_cases {
          name => "find_method",
          find => [
             {
-               tag       => qr/ ^ head \d $ /x,
-               text      => "get",
-               nth_group => 0,
-               keep_all  => 1,
+               tag      => qr/ ^ head \d $ /x,
+               text     => "get",
+               nth      => 0,
+               keep_all => 1,
             },
          ],
          expected_find => [
@@ -1575,9 +1575,9 @@ sub define_find_cases {
          name => "find_method_summary",
          find => [
             {
-               tag       => qr/ ^ head \d $ /x,
-               text      => "get",
-               nth_group => 0,
+               tag  => qr/ ^ head \d $ /x,
+               text => "get",
+               nth  => 0,
             },
             {
                tag => qr/ (?: Data | Para ) /x,

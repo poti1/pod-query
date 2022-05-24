@@ -7,8 +7,8 @@ Update pod
 Sort functions by name.
 
 Create find() query API:
-   find_title():              head1=NAME[0]/Para[0]
-   find_method():             head\d=function[[0]]**
-   find_method_summary():     head\d=function[0]/(?:Data|Para)[0]
-   find_events():             head\d=EVENTS[0]/head\d*/Para[[0]]
+   find_title():              (head1=NAME[0]/Para)[0]
+   find_method():             head\d=function[0]**
+   find_method_summary():     (head\d=function[0]/(?:Data|Para))[0]
+   find_events():             head\d=EVENTS[0]/head\d*/Para[0]
 
