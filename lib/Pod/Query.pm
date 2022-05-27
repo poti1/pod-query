@@ -276,6 +276,7 @@ sub _make_leaf ( $node ) {
       text => \@text,
    };
 
+   # TODO: Why have this since most pod are not using "over-text"?
    if ( $tag eq "over-text" ) {
       $leaf->{is_over} = 1;
       $leaf->{text}    = _structure_over( \@text );
@@ -438,7 +439,7 @@ context sensitive!
 
    $pod->find(@sections)
 
-   Where each section can contain:
+   Where each condition can contain:
    {
       tag       => "TAG_NAME",    # Find all matching tags.
       text      => "TEXT_NAME",   # Find all matching texts.
@@ -462,17 +463,17 @@ context sensitive!
 
 =cut
 
-sub find ( $s, @find_sections ) {
+sub find ( $s, @find_conditions ) {
 
-   _check_sections( \@find_sections );
-   _set_section_defaults( \@find_sections );
+   _check_conditions( \@find_conditions );
+   _set_condition_defaults( \@find_conditions );
 
    my @tree = $s->tree->@*;
    my $kept_all;
 
-   for my $find ( @find_sections ) {
-      @tree = _find( $find, @tree );
-      if ( $find->{keep_all} ) {
+   for ( @find_conditions ) {
+      @tree = _find( $_, @tree );
+      if ( $_->{keep_all} ) {
          $kept_all++;
          last;
       }
@@ -486,13 +487,13 @@ sub find ( $s, @find_sections ) {
 }
 
 
-=head2 _check_sections
+=head2 _check_conditions
 
 Check if queries are valid.
 
 =cut
 
-sub _check_sections ( $sections ) {
+sub _check_conditions ( $sections ) {
 
    my $error_message = <<~'ERROR';
 
@@ -511,7 +512,7 @@ sub _check_sections ( $sections ) {
                nth_group => 0,      # Nth only in the current group.
             },
             # ...
-            # sectionN
+            # conditionN
          );
    ERROR
 
@@ -536,46 +537,46 @@ sub _check_sections ( $sections ) {
 }
 
 
-=head2 _set_section_defaults
+=head2 _set_condition_defaults
 
 Assigns default query options.
 
 =cut
 
-sub _set_section_defaults ( $sections ) {
-   for my $section ( @$sections ) {
+sub _set_condition_defaults ( $conditions ) {
+   for my $condition ( @$conditions ) {
 
       # Text Options
       for ( qw/ tag text / ) {
-         if ( defined $section->{$_} ) {
-            if ( ref $section->{$_} ne ref qr// ) {
-               $section->{$_} = qr/ ^ $section->{$_} $ /x;
+         if ( defined $condition->{$_} ) {
+            if ( ref $condition->{$_} ne ref qr// ) {
+               $condition->{$_} = qr/ ^ $condition->{$_} $ /x;
             }
          }
          else {
-            $section->{$_} = qr/./;
+            $condition->{$_} = qr/./;
          }
       }
 
       # Bit Options
       for ( qw/ keep keep_all / ) {
-         if ( defined $section->{$_} ) {
-            $section->{$_} = !!$section->{$_};
+         if ( defined $condition->{$_} ) {
+            $condition->{$_} = !!$condition->{$_};
          }
          else {
-            $section->{$_} = 0;
+            $condition->{$_} = 0;
          }
       }
 
       # Range Options
       my $is_digit = qr/ ^ -?\d+ $ /x;
       for ( qw/ nth nth_group / ) {
-         my $v = $section->{$_};
+         my $v = $condition->{$_};
          if ( defined $v and $v =~ /$is_digit/ ) {
             $v ||= "0 but true";
             my $end  = ( $v >= 0 ) ? "pos" : "neg";    # Set negative or
             my $name = "_${_}_$end";                   # positive form.
-            $section->{$name} = $v;
+            $condition->{$name} = $v;
          }
       }
 
