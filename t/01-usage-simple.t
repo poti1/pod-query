@@ -38,7 +38,7 @@ my @cases = (
       ],
       expected_tree => [
          {
-            "sub" => [
+            "kids" => [
                {
                   "tag"  => "Para",
                   "text" => ["Example - Just an example"]
@@ -63,7 +63,7 @@ my @cases = (
       ],
       expected_tree => [
          {
-            "sub" => [
+            "kids" => [
                {
                   "tag"  => "Para",
                   "text" => ["Example - Just an example"]
@@ -93,7 +93,7 @@ my @cases = (
       lol           => [ [ "head2", "Function1" ], [ "Para", "Summary" ], ],
       expected_tree => [
          {
-            "sub" => [
+            "kids" => [
                {
                   "tag"  => "Para",
                   "text" => ["Summary"]
@@ -115,7 +115,7 @@ my @cases = (
       ],
       expected_tree => [
          {
-            "sub" => [
+            "kids" => [
                {
                   "tag"  => "Para",
                   "text" => ["Summary"]

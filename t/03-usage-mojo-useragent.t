@@ -488,7 +488,7 @@ sub lol {
 sub expected_tree {
    [
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Para",
                "text" => [
@@ -500,7 +500,7 @@ sub expected_tree {
          "text" => ["NAME"]
       },
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Verbatim",
                "text" => [
@@ -512,7 +512,7 @@ sub expected_tree {
          "text" => ["SYNOPSIS"]
       },
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Para",
                "text" => [
@@ -542,7 +542,7 @@ sub expected_tree {
          "text" => ["DESCRIPTION"]
       },
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Para",
                "text" => [
@@ -550,7 +550,7 @@ sub expected_tree {
                ]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" =>
@@ -573,7 +573,7 @@ sub expected_tree {
                "text" => ["prepare"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => ["  \$ua->on(start => sub (\$ua, \$tx) {...});"]
@@ -599,14 +599,14 @@ sub expected_tree {
          "text" => ["EVENTS"]
       },
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Para",
                "text" =>
                  ["Mojo::UserAgent implements the following attributes."]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -630,7 +630,7 @@ sub expected_tree {
                "text" => ["ca"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -648,7 +648,7 @@ sub expected_tree {
                "text" => ["cert"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -666,7 +666,7 @@ sub expected_tree {
                "text" => ["connect_timeout"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -690,7 +690,7 @@ sub expected_tree {
                "text" => ["cookie_jar"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -708,7 +708,7 @@ sub expected_tree {
                "text" => ["inactivity_timeout"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -732,7 +732,7 @@ sub expected_tree {
                "text" => ["insecure"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -750,7 +750,7 @@ sub expected_tree {
                "text" => ["ioloop"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -768,7 +768,7 @@ sub expected_tree {
                "text" => ["key"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -786,7 +786,7 @@ sub expected_tree {
                "text" => ["max_connections"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -804,7 +804,7 @@ sub expected_tree {
                "text" => ["max_redirects"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -822,7 +822,7 @@ sub expected_tree {
                "text" => ["max_response_size"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -846,7 +846,7 @@ sub expected_tree {
                "text" => ["proxy"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -870,7 +870,7 @@ sub expected_tree {
                "text" => ["request_timeout"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -894,7 +894,7 @@ sub expected_tree {
                "text" => ["server"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -912,7 +912,7 @@ sub expected_tree {
                "text" => ["socket_options"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -940,7 +940,7 @@ sub expected_tree {
          "text" => ["ATTRIBUTES"]
       },
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Para",
                "text" => [
@@ -948,7 +948,7 @@ sub expected_tree {
                ]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -972,7 +972,7 @@ sub expected_tree {
                "text" => ["build_tx"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -996,7 +996,7 @@ sub expected_tree {
                "text" => ["build_websocket_tx"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1020,7 +1020,7 @@ sub expected_tree {
                "text" => ["delete"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1044,7 +1044,7 @@ sub expected_tree {
                "text" => ["delete_p"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1068,7 +1068,7 @@ sub expected_tree {
                "text" => ["get"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" =>
@@ -1091,7 +1091,7 @@ sub expected_tree {
                "text" => ["get_p"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1115,7 +1115,7 @@ sub expected_tree {
                "text" => ["head"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" =>
@@ -1138,7 +1138,7 @@ sub expected_tree {
                "text" => ["head_p"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1162,7 +1162,7 @@ sub expected_tree {
                "text" => ["options"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1186,7 +1186,7 @@ sub expected_tree {
                "text" => ["options_p"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1210,7 +1210,7 @@ sub expected_tree {
                "text" => ["patch"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1233,7 +1233,7 @@ sub expected_tree {
                "text" => ["patch_p"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1257,7 +1257,7 @@ sub expected_tree {
                "text" => ["post"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" =>
@@ -1280,7 +1280,7 @@ sub expected_tree {
                "text" => ["post_p"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1304,7 +1304,7 @@ sub expected_tree {
                "text" => ["put"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" =>
@@ -1327,7 +1327,7 @@ sub expected_tree {
                "text" => ["put_p"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1351,7 +1351,7 @@ sub expected_tree {
                "text" => ["start"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1375,7 +1375,7 @@ sub expected_tree {
                "text" => ["start_p"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1411,7 +1411,7 @@ sub expected_tree {
                "text" => ["websocket"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -1439,7 +1439,7 @@ sub expected_tree {
          "text" => ["METHODS"]
       },
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Para",
                "text" => [
@@ -1455,7 +1455,7 @@ sub expected_tree {
          "text" => ["DEBUGGING"]
       },
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Para",
                "text" =>

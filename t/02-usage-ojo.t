@@ -207,7 +207,7 @@ sub lol {
 sub expected_tree {
    [
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Para",
                "text" => ["ojo - Fun one-liners with Mojo"]
@@ -217,7 +217,7 @@ sub expected_tree {
          "text" => ["NAME"]
       },
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Verbatim",
                "text" => [
@@ -229,7 +229,7 @@ sub expected_tree {
          "text" => ["SYNOPSIS"]
       },
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Para",
                "text" => [
@@ -301,7 +301,7 @@ sub expected_tree {
          "text" => ["DESCRIPTION"]
       },
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Para",
                "text" => [
@@ -309,7 +309,7 @@ sub expected_tree {
                ]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -333,7 +333,7 @@ sub expected_tree {
                "text" => ["a"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => ["  my \$stream = b('lalala');"]
@@ -353,7 +353,7 @@ sub expected_tree {
                "text" => ["b"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => ["  my \$collection = c(1, 2, 3);"]
@@ -367,7 +367,7 @@ sub expected_tree {
                "text" => ["c"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -385,7 +385,7 @@ sub expected_tree {
                "text" => ["d"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => ["  my \$path = f('/home/sri/foo.txt');"]
@@ -404,7 +404,7 @@ sub expected_tree {
                "text" => ["f"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -428,7 +428,7 @@ sub expected_tree {
                "text" => ["g"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -446,7 +446,7 @@ sub expected_tree {
                "text" => ["h"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -470,7 +470,7 @@ sub expected_tree {
                "text" => ["j"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => ["  my \$url = l('https://mojolicious.org');"]
@@ -490,7 +490,7 @@ sub expected_tree {
                "text" => ["l"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => ["  n {...};\n  n {...} 100;"]
@@ -512,7 +512,7 @@ sub expected_tree {
                "text" => ["n"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -530,7 +530,7 @@ sub expected_tree {
                "text" => ["o"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -548,7 +548,7 @@ sub expected_tree {
                "text" => ["p"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => ["  my \$perl = r({data => 'structure'});"]
@@ -570,7 +570,7 @@ sub expected_tree {
                "text" => ["r"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -588,7 +588,7 @@ sub expected_tree {
                "text" => ["t"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => [
@@ -606,7 +606,7 @@ sub expected_tree {
                "text" => ["u"]
             },
             {
-               "sub" => [
+               "kids" => [
                   {
                      "tag"  => "Verbatim",
                      "text" => ["  my \$dom = x('<div>Hello!</div>');"]
@@ -630,7 +630,7 @@ sub expected_tree {
          "text" => ["FUNCTIONS"]
       },
       {
-         "sub" => [
+         "kids" => [
             {
                "tag"  => "Para",
                "text" =>

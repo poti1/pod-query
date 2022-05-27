@@ -6,13 +6,14 @@ use warnings;
 use FindBin qw/ $RealBin /;
 
 # use lib "$RealBin/Pod-LOL/lib";
+use Carp qw/ croak /;
+use List::Util qw/ first /;
 use Mojo::Base qw/ -base -signatures /;
 use Mojo::Util qw/ dumper class_to_path /;
 use Mojo::ByteStream qw/ b/;
 use Term::ReadKey qw/ GetTerminalSize /;
 use Pod::Text();
 use Pod::LOL;
-use Carp qw/ croak /;
 
 =head1 NAME
 
@@ -20,11 +21,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.06
+Version 0.07
 
 =cut
 
-our $VERSION      = '0.06';
+our $VERSION      = '0.07';
 our $DEBUG_TREE   = 0;
 our $DEBUG_FIND   = 0;
 our $DEBUG_INVERT = 0;
@@ -52,7 +53,7 @@ $pod contains the Pod::LOL object and a tree like:
 
  "tree" => [
     {
-      "sub" => [
+      "kids" => [
         {
           "tag" => "Para",
           "text" => [
@@ -66,7 +67,7 @@ $pod contains the Pod::LOL object and a tree like:
       ]
     },
     {
-      "sub" => [
+      "kids" => [
         {
           "tag" => "Para",
           "text" => [
@@ -123,9 +124,6 @@ sub new ( $class, $pod_class, $path_only = 0 ) {
 
    $s->lol( $lol );
    $s->tree( _lol_to_tree( $lol ) );
-
-   # say dumper $s;
-   # exit;
 
    $CACHE{$pod_class} = $s;
 
@@ -222,69 +220,44 @@ tree.
 sub _lol_to_tree ( $lol ) {
    my ( $is_in, $is_out );
    my $is_head = qr/ ^ head (\d) $ /x;
-   my @main;
-   my $q = {};
+   my @tree;
+   my $node = {};
 
-   my $push = sub {    # push to main list
-      return unless %$q;             # only if queue
-      my $sub = $q->{sub};           # sub tags
-      my $has = _has_head( $sub );
-      $q->{sub} = _lol_to_tree( $sub )
-        if $has;    # TODO: rename "sub" to "inside" or "inner".
-      push @main, $q;
-      $q = {};
+   my $push = sub {    # push to tree.
+      return if not %$node;
+      my $kids     = $node->{kids};    # sub tags
+      my $has_head = ref( $kids ) && first { $_->{tag} =~ /$is_head/ } @$kids;
+      $node->{kids} = _lol_to_tree( $kids ) if $has_head;
+      push @tree, $node;
+      $node = {};
    };
 
-   $DEBUG_TREE
-     and say "\n_ROOT_TO_TREE()";
+   say "\n_ROOT_TO_TREE()" if $DEBUG_TREE;
 
    for ( $lol->@* ) {
-      $DEBUG_TREE
-        and say "\n_=", dumper $_;
+      say "\n_=", dumper $_ if $DEBUG_TREE;
 
       my $leaf = _make_leaf( $_ );
-      my $tag  = $leaf->{tag};
+      say "\nleaf=", dumper $leaf if $DEBUG_TREE;
 
-      $DEBUG_TREE
-        and say "\nleaf=", dumper $leaf;
-
-      if ( not $is_in or $tag =~ /$is_out/ ) {
+      # Outer tag.
+      if ( not $is_in or $leaf->{tag} =~ /$is_out/ ) {
          $push->();
-         $q = $leaf;
-         next unless $tag =~ /$is_head/;
-         ( $is_in, $is_out ) = _get_heads_regex( $1 );
+         $node = $leaf;
+         if ( $leaf->{tag} =~ /$is_head/ ) {
+            ( $is_in, $is_out ) = _get_heads_regex( $1 );
+         }
       }
       else {
-         $q->{sub} //= [];
-         push $q->{sub}->@*, $leaf;
-         $DEBUG_TREE
-           and say "q: ", dumper $q;
+         $node->{kids} //= [];
+         push $node->{kids}->@*, $leaf;
+         say "node: ", dumper $node if $DEBUG_TREE;
       }
    }
 
    $push->();
 
-   \@main;
-}
-
-
-=head2 _has_head
-
-Check if the node has sub heads.
-
-=cut
-
-sub _has_head ( $list ) {
-   return unless ref $list;
-
-   $DEBUG_TREE
-     and say "\nlist=", dumper $list;
-
-   my $is_head = qr/ ^ head (\d) $ /x;
-
-   my $any_head = grep { $_->{tag} =~ /$is_head/; } @$list;
-
-   $any_head;
+   \@tree;
 }
 
 
@@ -304,7 +277,8 @@ sub _make_leaf ( $node ) {
    };
 
    if ( $tag eq "over-text" ) {
-      $leaf->{is_over} = 1, $leaf->{text} = _structure_over( \@text ),;
+      $leaf->{is_over} = 1;
+      $leaf->{text}    = _structure_over( \@text );
    }
 
    $leaf;
@@ -333,6 +307,23 @@ sub _structure_over ( $text_list ) {
    push @struct, [ splice @q ] if @q;
 
    \@struct;
+}
+
+
+=head2 _get_heads_regex
+
+Generates the regexes for head elements inside
+and outside the current head.
+
+=cut
+
+sub _get_heads_regex ( $num ) {
+   my $inner  = join "", ( $num + 1 .. 5 );    # num=2, inner=345
+   my $outer  = join "", ( 0 .. $num );        # num=2, outer=012
+   my $is_in  = qr/ ^ head ([$inner]) $ /x;
+   my $is_out = qr/ ^ head ([$outer]) $ /x;
+
+   ( $is_in, $is_out );
 }
 
 
@@ -583,31 +574,12 @@ sub _set_section_defaults ( $sections ) {
          if ( defined $v and $v =~ /$is_digit/ ) {
             $v ||= "0 but true";
             my $end  = ( $v >= 0 ) ? "pos" : "neg";    # Set negative or
-            my $name = "_${_}_$end";                   # postive form.
+            my $name = "_${_}_$end";                   # positive form.
             $section->{$name} = $v;
          }
       }
 
    }
-}
-
-
-=head2 _get_heads_regex
-
-Generates the regexes for head elements inside
-and outside the current head.
-
-=cut
-
-sub _get_heads_regex ( $num ) {
-
-   # Make regex for inner and outer =head tags
-   my $inner  = join "", grep { $_ > $num } 0 .. 5;
-   my $outer  = join "", grep { $_ <= $num } 0 .. 5;
-   my $is_in  = qr/ ^ head ([$inner]) $ /x;
-   my $is_out = qr/ ^ head ([$outer]) $ /x;
-
-   ( $is_in, $is_out );
 }
 
 
@@ -677,9 +649,9 @@ sub _find ( $need, @groups ) {
             }
          }
 
-         if ( $try->{sub} and not @found_in_group ) {
-            say "Got sub and nothing yet in queue" if $DEBUG_FIND;
-            unshift @tries, $try->{sub}->@*;    # Process sub tags.
+         if ( $try->{kids} and not @found_in_group ) {
+            say "Got kids and nothing yet in queue" if $DEBUG_FIND;
+            unshift @tries, $try->{kids}->@*;    # Process kids tags.
             if ( $try->{keep} and not $locked_prev++ ) {
                unshift @prev,
                  {
@@ -765,7 +737,7 @@ sub _invert ( @groups ) {
    my %navi;
 
    for my $group ( @groups ) {
-      push @tree, { %$group{qw/tag text sub is_over/} };
+      push @tree, { %$group{qw/tag text kids is_over/} };
       if ( $DEBUG_INVERT ) {
          say "\nInverting: group=", dumper $group;
          say "tree: ",              dumper \@tree;
@@ -787,15 +759,14 @@ sub _invert ( @groups ) {
          }
          else {
             $prev_node = $navi{$prev} = [ $tree[-1] ];
-            $tree[-1] = { %$prev, sub => $prev_node };
+            $tree[-1] = { %$prev, kids => $prev_node };
             if ( $DEBUG_INVERT ) {
                say "NEW: prev_node=", dumper $prev_node;
             }
          }
       }
 
-      $DEBUG_INVERT
-        and say "tree end: ", dumper \@tree;
+      say "tree end: ", dumper \@tree if $DEBUG_INVERT;
    }
 
    @tree;
@@ -824,16 +795,14 @@ sub _render ( $kept_all, @tree ) {
 
    for my $group ( @tree ) {
       my @tries = ( $group );
-      $DEBUG_RENDER
-        and say "\ngroup:  ", dumper $group;
+      say "\ngroup:  ", dumper $group if $DEBUG_RENDER;
 
       while ( my $try = shift @tries ) {
-         $DEBUG_RENDER
-           and say "\nTrying: try=", dumper $try;
+         say "\nTrying: try=", dumper $try if $DEBUG_RENDER;
 
          my $_tag  = $try->{tag};
          my $_text = $try->{text}[0];
-         my $_sub  = $try->{sub};
+         my $kids  = $try->{kids};
 
          if ( $try->{is_over} ) {
             $_text = _render_over( $try->{text}, $kept_all, );
@@ -841,8 +810,7 @@ sub _render ( $kept_all, @tree ) {
          elsif ( $kept_all ) {
             $_text .= ":" if ++$n == 1;
             if ( $_tag eq "Para" ) {
-               $DEBUG_RENDER
-                 and say "USING FORMATTER";
+               say "USING FORMATTER" if $DEBUG_RENDER;
                $_text = $formatter->reformat( $_text );
             }
          }
@@ -850,10 +818,10 @@ sub _render ( $kept_all, @tree ) {
          push @lines, $_text;
          push @lines, "" if $kept_all;
 
-         if ( $_sub ) {
-            unshift @tries, @$_sub;
+         if ( $kids ) {
+            unshift @tries, @$kids;
             if ( $DEBUG_RENDER ) {
-               say "Got subs";
+               say "Got kids";
                say "tries:  ", dumper \@tries;
             }
          }
@@ -862,8 +830,7 @@ sub _render ( $kept_all, @tree ) {
 
    }
 
-   $DEBUG_RENDER
-     and say "lines: ", dumper \@lines;
+   say "lines: ", dumper \@lines if $DEBUG_RENDER;
 
    return @lines if wantarray;
    join "\n", @lines;
@@ -897,15 +864,13 @@ sub _render_over ( $list, $kept_all ) {
    for my $items ( @$list ) {
       my $n;
       for ( @$items ) {
-         $DEBUG_RENDER
-           and say "over-item=", dumper $_;
+         say "over-item=", dumper $_ if $DEBUG_RENDER;
 
          my ( $tag, $text ) = @$_;
 
          if ( $kept_all ) {
-            $DEBUG_RENDER
-              and say "USING FORMATTER";
-            $text .= ":" if ++$n == 1;
+            say "USING FORMATTER" if $DEBUG_RENDER;
+            $text .= ":"          if ++$n == 1;
             if ( $tag eq "item-text" ) {
                $text = $f_norm->reformat( $text );
             }
@@ -922,8 +887,7 @@ sub _render_over ( $list, $kept_all ) {
 
    my $new_text = join "\n", @txt;
 
-   $DEBUG_RENDER
-     and say "Changed over-text to: $new_text";
+   say "Changed over-text to: $new_text" if $DEBUG_RENDER;
 
    $new_text;
 }
