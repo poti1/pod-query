@@ -8,6 +8,7 @@ use FindBin qw/ $RealBin /;
 # use lib "$RealBin/Pod-LOL/lib";
 use Carp qw/ croak /;
 use List::Util qw/ first /;
+use Text::ParseWords qw/ parse_line /;
 use Mojo::Base qw/ -base -signatures /;
 use Mojo::Util qw/ dumper class_to_path /;
 use Mojo::ByteStream qw/ b/;
@@ -21,11 +22,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.07
+Version 0.08
 
 =cut
 
-our $VERSION      = '0.07';
+our $VERSION      = '0.08';
 our $DEBUG_TREE   = 0;
 our $DEBUG_FIND   = 0;
 our $DEBUG_INVERT = 0;
@@ -91,7 +92,7 @@ Find Methods:
 	say $pod->find(@queries);
 
 Inline (Debugging)
-	perl -IPod-Query/lib -MPod::Query -MMojo::Util=dumper -E "say dumper(Pod::Query->new('Pod::LOL'))"
+	perl -MPod::Query -MMojo::Util=dumper -E "say dumper(Pod::Query->new('Pod::LOL'))"
 
 =head1 DESCRIPTION
 
@@ -103,6 +104,13 @@ and provides methods to query specific information.
 =head2 new
 
 Create a new object.
+Return value is cached (bash on the class of the pod file).
+
+	use Pod::Query;
+	my $pod = Pod::Query->new('Pod::LOL', PATH_ONLY=0);
+
+PATH_ONLY can be used to determine the path to the pod
+document without having to do much unnecessary work.
 
 =cut
 
@@ -134,6 +142,7 @@ sub new ( $class, $pod_class, $path_only = 0 ) {
 =head2 _class_to_path
 
 Given a class name, retuns the path to the pod file.
+Return value is cached (bash on the class of the pod file).
 
 =cut
 
@@ -212,22 +221,47 @@ sub _flatten_for_tags ( $lol ) {
 
 =head2 _lol_to_tree
 
-Transforms a Pod::LOL object into a structured
-tree.
+Generates a tree from a Pod::LOL object.
+The structure of the tree is based on the N (level) in "=headN".
+
+Starting as "=head2", until we see "=head1" or another "=head2",
+all tags will be grouped "under" the "=head1" as a child (aka kid).
+
+For example:
+
+   =head1 FUNCTIONS
+
+   =Para  Description of Functions
+
+   =head2 Function1
+
+   =Para  Description of Function1
+
+   =head1 AUTHOR
+
+   =cut
+
+This will be grouped as:
+   =head1 FUNCTIONS
+      =Para Description of Functions
+      =head2 Function1
+         =Para Description of Function1
+   =head1 AUTHOR
 
 =cut
 
 sub _lol_to_tree ( $lol ) {
    my ( $is_in, $is_out );
-   my $is_head = qr/ ^ head (\d) $ /x;
+   my %heads_table = __PACKAGE__->_define_heads_regex_table();
+   my $is_head     = qr/ ^ head (\d) $ /x;
+   my $node        = {};
    my @tree;
-   my $node = {};
 
    my $push = sub {    # push to tree.
       return if not %$node;
-      my $kids     = $node->{kids};    # sub tags
-      my $has_head = ref( $kids ) && first { $_->{tag} =~ /$is_head/ } @$kids;
-      $node->{kids} = _lol_to_tree( $kids ) if $has_head;
+      my $kids = $node->{kids};
+      $node->{kids} = _lol_to_tree( $kids )
+        if ref( $kids ) && first { $_->{tag} =~ /$is_head/ } @$kids;
       push @tree, $node;
       $node = {};
    };
@@ -245,11 +279,10 @@ sub _lol_to_tree ( $lol ) {
          $push->();
          $node = $leaf;
          if ( $leaf->{tag} =~ /$is_head/ ) {
-            ( $is_in, $is_out ) = _get_heads_regex( $1 );
+            ( $is_in, $is_out ) = $heads_table{$1}->@*;
          }
       }
       else {
-         $node->{kids} //= [];
          push $node->{kids}->@*, $leaf;
          say "node: ", dumper $node if $DEBUG_TREE;
       }
@@ -258,6 +291,23 @@ sub _lol_to_tree ( $lol ) {
    $push->();
 
    \@tree;
+}
+
+
+=head2 _define_heads_regex_table
+
+Generates the regexes for head elements inside
+and outside the current head.
+
+=cut
+
+sub _define_heads_regex_table {
+   map {
+      my $inner = join "", $_ + 1 .. 5;    # num=2, inner=345
+      my $outer = join "", 0 .. $_;        # num=2, outer=012
+
+      $_ => [ map { qr/ ^ head ([$_]) $ /x } $inner, $outer ]
+   } 1 .. 4;
 }
 
 
@@ -311,23 +361,6 @@ sub _structure_over ( $text_list ) {
 }
 
 
-=head2 _get_heads_regex
-
-Generates the regexes for head elements inside
-and outside the current head.
-
-=cut
-
-sub _get_heads_regex ( $num ) {
-   my $inner  = join "", ( $num + 1 .. 5 );    # num=2, inner=345
-   my $outer  = join "", ( 0 .. $num );        # num=2, outer=012
-   my $is_in  = qr/ ^ head ([$inner]) $ /x;
-   my $is_out = qr/ ^ head ([$outer]) $ /x;
-
-   ( $is_in, $is_out );
-}
-
-
 =head2 find_title
 
 Extracts the title information.
@@ -335,17 +368,7 @@ Extracts the title information.
 =cut
 
 sub find_title ( $s ) {
-   scalar $s->find(
-      {
-         tag  => "head1",
-         text => "NAME",
-         nth  => 0,
-      },
-      {
-         tag => "Para",
-         nth => 0,
-      },
-   );
+   scalar $s->find( 'head1=NAME[0]/Para[0]' );
 }
 
 
@@ -356,14 +379,8 @@ Extracts the complete method information.
 =cut
 
 sub find_method ( $s, $method ) {
-   $s->find(
-      {
-         tag      => qr/ ^ head \d $ /x,
-         text     => quotemeta( $method ) . $s->_is_function_call,
-         nth      => 0,
-         keep_all => 1,
-      },
-   );
+   $s->find( sprintf '~head=~^%s\b.*$[0]**',
+      $s->_clean_method_name( $method ) );
 }
 
 
@@ -374,33 +391,19 @@ Extracts the method summary.
 =cut
 
 sub find_method_summary ( $s, $method ) {
-   scalar $s->find(
-      {
-         tag  => qr/ ^ head \d $ /x,
-         text => quotemeta( $method ) . $s->_is_function_call,
-         nth  => 0,
-      },
-      {
-         tag => qr/ (?: Data | Para ) /x,
-         nth => 0,
-      },
-   );
+   scalar $s->find( sprintf '~head=~^%s\b.*$[0]/~(Data|Para)[0]',
+      $s->_clean_method_name( $method ) );
 }
 
 
-=head2 _is_function_call
+=head2 _clean_method_name
 
-Regex for function call parenthesis.
+Returns a method name without any possible parenthesis.
 
 =cut
 
-sub _is_function_call {
-
-   # Optional "()".
-   qr/ (?:
-         \( [^()]* \)
-      )?
-   /x;
+sub _clean_method_name ( $s, $name ) {
+   $name =~ s/[^a-zA-Z0-9_]+//gr;
 }
 
 
@@ -413,21 +416,7 @@ Returns a list of key value pairs.
 =cut
 
 sub find_events ( $s ) {
-   $s->find(
-      {
-         tag  => qr/ ^ head \d $ /x,
-         text => "EVENTS",
-         nth  => 0,
-      },
-      {
-         tag  => qr/ ^ head \d $ /x,
-         keep => 1,
-      },
-      {
-         tag       => "Para",
-         nth_group => 0,
-      },
-   );
+   $s->find( '~head=EVENTS[0]/~head*/(Para)[0]' );
 }
 
 
@@ -437,7 +426,10 @@ Generic extraction command.
 
 context sensitive!
 
-   $pod->find(@sections)
+   $query->find($condition)
+      Where condtion is a string as described in L</"_query_string_to_struct">
+
+   $query->find(@conditions)
 
    Where each condition can contain:
    {
@@ -446,7 +438,7 @@ context sensitive!
       keep      => 1,             # Capture the text.
       keep_all  => 1,             # Capture entire section.
       nth       => 0,             # Use only the nth match.
-      nth_group => 0,             # Use only the nth matching group.
+      nth_in_group => 0,             # Use only the nth matching group.
    }
 
    # Return contents of entire head section:
@@ -463,15 +455,25 @@ context sensitive!
 
 =cut
 
-sub find ( $s, @find_conditions ) {
+sub find ( $s, @raw_conditions ) {
 
-   _check_conditions( \@find_conditions );
-   _set_condition_defaults( \@find_conditions );
+   my $find_conditions;
+
+   # If the find condition is a single string.
+   if ( @raw_conditions == 1 and not ref $raw_conditions[0] ) {
+      $find_conditions = $s->_query_string_to_struct( $raw_conditions[0] );
+   }
+   else {
+      $find_conditions = \@raw_conditions;
+   }
+
+   _check_conditions( $find_conditions );
+   _set_condition_defaults( $find_conditions );
 
    my @tree = $s->tree->@*;
    my $kept_all;
 
-   for ( @find_conditions ) {
+   for ( @$find_conditions ) {
       @tree = _find( $_, @tree );
       if ( $_->{keep_all} ) {
          $kept_all++;
@@ -484,6 +486,73 @@ sub find ( $s, @find_conditions ) {
    }
 
    _render( $kept_all, @tree );
+}
+
+
+=head2 _query_string_to_struct
+
+Convert a pod query string into a structure based on these rules:
+
+   1. Split string by '/'.
+      Each piece is a separate list of conditions.
+
+   2. Remove an optional '*' or '**' from the last condition.
+      Keep is set if we have '*'.
+      Keep all is set if we have '**'.
+
+   3. Remove an optional [N] from the last condition.
+      (Where N is a decimal).
+      Set nth base on 'N'.
+      Set nth_in_group if previous word is surrounded by ():
+         (WORD)[N]
+
+   4. Split each list of conditions by '='.
+      First word is the tag.
+      Second word is the text (if any).
+      If  either starts with '~', then the word
+         is treated like a pattern.
+
+=cut
+
+sub _query_string_to_struct {
+   my ( $s, $query_string ) = @_;    # signature was somehow failing a test!
+   my $is_nth          = qr/ \[ (-?\d+) \] /x;
+   my $is_nth_in_group = qr/ ^ \( (.+) \) $is_nth $ /x;
+   my $is_keep         = qr/ \* $ /x;
+   my $is_keep_all     = qr/ \* \* $ /x;
+
+   my @query_struct =
+     map {
+      my @condition = parse_line( '=', 1, $_ );
+      my $set       = {};
+
+      for ( $condition[-1] ) {
+         if ( s/$is_keep_all// ) {
+            $set->{keep_all}++;
+         }
+         elsif ( s/$is_keep// ) {
+            $set->{keep}++;
+         }
+
+         if ( s/$is_nth_in_group// ) {
+            $_ = $1;
+            $set->{nth_in_group} = $2;
+         }
+         elsif ( s/$is_nth// ) {
+            $set->{nth} = $1;
+         }
+      }
+
+      for ( qw/ tag text / ) {
+         last if not @condition;
+         my $cond = shift @condition;
+         $set->{$_} = $cond =~ s/^~// ? qr/$cond/ : $cond;
+      }
+
+      $set;
+     } parse_line( '/', 1, $query_string );
+
+   \@query_struct;
 }
 
 
@@ -501,15 +570,19 @@ sub _check_conditions ( $sections ) {
 
       Syntax:
 
+         $pod->find( 'QUERY' )         # As explained in _query_string_to_struct().
+
+         # OR:
+
          $pod->find(
             # section1
             {
-               tag       => "TAG",  # Search to look for.
-               text      => "TEXT", # Text of the tag to find.
-               keep      => 1,      # Must only be in last section.
-               keep_all  => 1,      # Keep this tag and sub tags.
-               nth       => 0,      # Stop searching after find so many matches.
-               nth_group => 0,      # Nth only in the current group.
+               tag          => "TAG",  # Search to look for.
+               text         => "TEXT", # Text of the tag to find.
+               keep         => 1,      # Must only be in last section.
+               keep_all     => 1,      # Keep this tag and sub tags.
+               nth          => 0,      # Stop searching after find so many matches.
+               nth_in_group => 0,      # Nth only in the current group.
             },
             # ...
             # conditionN
@@ -528,11 +601,11 @@ sub _check_conditions ( $sections ) {
         if $section->{keep_all} and $n < $last;
    }
 
-   # Cannot use both nth and nth_group (makes no sense, plus may cause errors)
+  # Cannot use both nth and nth_in_group (makes no sense, plus may cause errors)
    while ( my ( $n, $section ) = each @$sections ) {
-      die "Error: nth and nth_group are exclusive!\n"
+      die "Error: nth and nth_in_group are exclusive!\n"
         if defined $section->{nth}
-        and defined $section->{nth_group};
+        and defined $section->{nth_in_group};
    }
 }
 
@@ -570,7 +643,7 @@ sub _set_condition_defaults ( $conditions ) {
 
       # Range Options
       my $is_digit = qr/ ^ -?\d+ $ /x;
-      for ( qw/ nth nth_group / ) {
+      for ( qw/ nth nth_in_group / ) {
          my $v = $condition->{$_};
          if ( defined $v and $v =~ /$is_digit/ ) {
             $v ||= "0 but true";
@@ -599,10 +672,10 @@ sub _find ( $need, @groups ) {
       say "groups: ", dumper \@groups;
    }
 
-   my $nth_p       = $need->{_nth_pos};         # Simplify code by already
-   my $nth_n       = $need->{_nth_neg};         # knowing if neg or pos.
-   my $nth_group_p = $need->{_nth_grou_pos};    # Set in _set_section_defaults.
-   my $nth_group_n = $need->{_nth_grou_neg};
+   my $nth_p          = $need->{_nth_pos};       # Simplify code by already
+   my $nth_n          = $need->{_nth_neg};       # knowing if neg or pos.
+   my $nth_in_group_p = $need->{_nth_grou_pos};  # Set in _set_section_defaults.
+   my $nth_in_group_n = $need->{_nth_grou_neg};
    my @found;
 
  GROUP:
@@ -643,9 +716,9 @@ sub _find ( $need, @groups ) {
             }
 
             # Specific group match (positive)
-            elsif ( $nth_group_p and @found_in_group > $nth_group_p ) {
-               say "ENFORCING: nth_group=$nth_group_p" if $DEBUG_FIND;
-               @found_in_group = $found_in_group[$nth_group_p];    # Submatch
+            elsif ( $nth_in_group_p and @found_in_group > $nth_in_group_p ) {
+               say "ENFORCING: nth_in_group=$nth_in_group_p" if $DEBUG_FIND;
+               @found_in_group = $found_in_group[$nth_in_group_p];    # Submatch
                last TRY;
             }
          }
@@ -666,9 +739,9 @@ sub _find ( $need, @groups ) {
       }
 
       # Specific group match (negative)
-      if ( $nth_group_n and @found_in_group >= abs $nth_group_n ) {
-         say "ENFORCING: nth_group_n=$nth_group_n" if $DEBUG_FIND;
-         @found_in_group = $found_in_group[$nth_group_n];
+      if ( $nth_in_group_n and @found_in_group >= abs $nth_in_group_n ) {
+         say "ENFORCING: nth_in_group_n=$nth_in_group_n" if $DEBUG_FIND;
+         @found_in_group = $found_in_group[$nth_in_group_n];
       }
 
       push @found, splice @found_in_group if @found_in_group;
@@ -936,7 +1009,7 @@ Please report any bugs or feature requests to L<https://github.com/poti1/pod-que
 
 These options to _find() appear to only be currently working if set to o or -1:
    nth
-   nth_group
+   nth_in_group
 
 
 =head1 SUPPORT

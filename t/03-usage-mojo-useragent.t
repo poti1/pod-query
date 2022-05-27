@@ -1601,8 +1601,8 @@ sub define_find_cases {
                keep => 1,
             },
             {
-               tag       => "Para",
-               nth_group => 0,
+               tag          => "Para",
+               nth_in_group => 0,
             },
          ],
          expected_find => [
@@ -1895,18 +1895,18 @@ sub define_find_cases {
 "  use Mojo::UserAgent;\n\n  # Fine grained response handling (dies on connection errors)\n  my \$ua  = Mojo::UserAgent->new;\n  my \$res = \$ua->get('docs.mojolicious.org')->result;\n  if    (\$res->is_success)  { say \$res->body }\n  elsif (\$res->is_error)    { say \$res->message }\n  elsif (\$res->code == 301) { say \$res->headers->location }\n  else                      { say 'Whatever...' }\n\n  # Say hello to the Unicode snowman and include an Accept header\n  say \$ua->get('www.\x{2603}.net?hello=there' => {Accept => '*/*'})->result->body;\n\n  # Extract data from HTML and XML resources with CSS selectors\n  say \$ua->get('www.perl.org')->result->dom->at('title')->text;\n\n  # Scrape the latest headlines from a news site\n  say \$ua->get('blogs.perl.org')->result->dom->find('h2 > a')->map('text')->join(\"\\n\");\n\n  # IPv6 PUT request with Content-Type header and content\n  my \$tx = \$ua->put('[::1]:3000' => {'Content-Type' => 'text/plain'} => 'Hi!');\n\n  # Quick JSON API request with Basic authentication\n  my \$url = Mojo::URL->new('https://example.com/test.json')->userinfo('sri:\x{2603}');\n  my \$value = \$ua->get(\$url)->result->json;\n\n  # JSON POST (application/json) with TLS certificate authentication\n  my \$tx = \$ua->cert('tls.crt')->key('tls.key')->post('https://example.com' => json => {top => 'secret'});\n\n  # Form POST (application/x-www-form-urlencoded)\n  my \$tx = \$ua->post('https://metacpan.org/search' => form => {q => 'mojo'});\n\n  # Search DuckDuckGo anonymously through Tor\n  \$ua->proxy->http('socks://127.0.0.1:9050');\n  say \$ua->get('api.3g2upl4pq6kufc4m.onion/?q=mojolicious&format=json')->result->json('/Abstract');\n\n  # GET request via UNIX domain socket \"/tmp/myapp.sock\" (percent encoded slash)\n  say \$ua->get('http+unix://%2Ftmp%2Fmyapp.sock/test')->result->body;\n\n  # Follow redirects to download Mojolicious from GitHub\n  \$ua->max_redirects(5)\n    ->get('https://www.github.com/mojolicious/mojo/tarball/main')\n    ->result->save_to('/home/sri/mojo.tar.gz');\n\n  # Non-blocking request\n  \$ua->get('mojolicious.org' => sub (\$ua, \$tx) { say \$tx->result->dom->at('title')->text });\n  Mojo::IOLoop->start unless Mojo::IOLoop->is_running;\n\n  # Concurrent non-blocking requests (synchronized with promises)\n  my \$mojo_promise = \$ua->get_p('mojolicious.org');\n  my \$cpan_promise = \$ua->get_p('cpan.org');\n  Mojo::Promise->all(\$mojo_promise, \$cpan_promise)->then(sub (\$mojo, \$cpan) {\n    say \$mojo->[0]->result->dom->at('title')->text;\n    say \$cpan->[0]->result->dom->at('title')->text;\n  })->wait;\n\n  # WebSocket connection sending and receiving JSON via UNIX domain socket\n  \$ua->websocket('ws+unix://%2Ftmp%2Fmyapp.sock/echo.json' => sub (\$ua, \$tx) {\n    say 'WebSocket handshake failed!' and return unless \$tx->is_websocket;\n    \$tx->on(json => sub (\$tx, \$hash) {\n      say \"WebSocket message via JSON: \$hash->{msg}\";\n      \$tx->finish;\n    });\n    \$tx->send({json => {msg => 'Hello World!'}});\n  });\n  Mojo::IOLoop->start unless Mojo::IOLoop->is_running;"
          ],
          debug => "find",
-         skip  => "Nth may be confused with nth_group",
+         skip  => "Nth may be confused with nth_in_group",
       },
 
-      # Nth_group.
+      # nth_in_group.
       {
-         name => "find nth_group=Second,First",
+         name => "find nth_in_group=Second,First",
          find => [
             {
-               nth_group => 1,
+               nth_in_group => 1,
             },
             {
-               nth_group => 0,
+               nth_in_group => 0,
             },
          ],
          expected_find => [
@@ -1917,7 +1917,7 @@ sub define_find_cases {
 "Code for nth needs to be restructured to make sure nth really means nth found.",
       },
 
-      # Nth vs Nth_group.
+      # Nth vs nth_in_group.
       {
          name => "find attributes",
          find => [
@@ -1931,8 +1931,8 @@ sub define_find_cases {
                keep => 1,
             },
             {
-               tag       => "Para",
-               nth_group => 1,
+               tag          => "Para",
+               nth_in_group => 1,
             },
          ],
          expected_find => [
@@ -2036,7 +2036,7 @@ sub define_find_cases {
       # keep      => 1,      # Must only be in last section.
       # keep_all  => 1,
       # nth       => 0,      # These options ...
-      # nth_group => 0,      #   are exclusive.
+      # nth_in_group => 0,      #   are exclusive.
 
    ]
 }

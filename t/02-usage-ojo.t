@@ -199,6 +199,13 @@ sub lol {
          "Verbatim",
 "  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'"
       ],
+      [ "head2",    "x2()" ],    # Added just for testing.
+      [ "Verbatim", "  my \$dom = x('<div>Hello!</div>');" ],
+      [ "Para",     "Turn HTML/XML input into Mojo::DOM object." ],
+      [
+         "Verbatim",
+"  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'"
+      ],
       [ "head1", "SEE ALSO" ],
       [ "Para",  "Mojolicious, Mojolicious::Guides, https://mojolicious.org." ]
    ];
@@ -624,6 +631,26 @@ sub expected_tree {
                ],
                "tag"  => "head2",
                "text" => ["x"]
+            },
+            {
+               "kids" => [
+                  {
+                     "tag"  => "Verbatim",
+                     "text" => ["  my \$dom = x('<div>Hello!</div>');"]
+                  },
+                  {
+                     "tag"  => "Para",
+                     "text" => ["Turn HTML/XML input into Mojo::DOM object."]
+                  },
+                  {
+                     "tag"  => "Verbatim",
+                     "text" => [
+"  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'"
+                     ]
+                  }
+               ],
+               "tag"  => "head2",
+               "text" => ["x2()"]
             }
          ],
          "tag"  => "head1",
@@ -657,6 +684,21 @@ sub define_cases {
          method               => "x",
          expected_find_method => [
             "x:",
+            "",
+            "  my \$dom = x('<div>Hello!</div>');",
+            "",
+            "  Turn HTML/XML input into Mojo::DOM object.",
+            "",
+"  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'",
+            ""
+         ],
+         expected_find_method_summary =>
+           "Turn HTML/XML input into Mojo::DOM object.",
+      },
+      {
+         method               => "x2()",
+         expected_find_method => [
+            "x2():",
             "",
             "  my \$dom = x('<div>Hello!</div>');",
             "",
@@ -722,10 +764,10 @@ sub define_find_cases {
          name => "find_method",
          find => [
             {
-               tag       => qr/ ^ head \d $ /x,
-               text      => "x",
-               nth_group => 0,
-               keep_all  => 1,
+               tag          => qr/ ^ head \d $ /x,
+               text         => "x",
+               nth_in_group => 0,
+               keep_all     => 1,
             },
          ],
          expected_find => [
@@ -743,9 +785,9 @@ sub define_find_cases {
          name => "find_method_summary",
          find => [
             {
-               tag       => qr/ ^ head \d $ /x,
-               text      => "x",
-               nth_group => 0,
+               tag          => qr/ ^ head \d $ /x,
+               text         => "x",
+               nth_in_group => 0,
             },
             {
                tag => qr/ (?: Data | Para ) /x,
@@ -767,8 +809,8 @@ sub define_find_cases {
                keep => 1,
             },
             {
-               tag       => "Para",
-               nth_group => 0,
+               tag          => "Para",
+               nth_in_group => 0,
             },
          ],
          expected_find => [],
@@ -855,6 +897,10 @@ sub define_find_cases {
 "  my \$res = u('example.com');\n  my \$res = u('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = u('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = u('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});",
 "Perform PUT request with \"put\" in Mojo::UserAgent and return resulting Mojo::Message::Response object.",
             "x",
+            "  my \$dom = x('<div>Hello!</div>');",
+            "Turn HTML/XML input into Mojo::DOM object.",
+"  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'",
+            "x2()",
             "  my \$dom = x('<div>Hello!</div>');",
             "Turn HTML/XML input into Mojo::DOM object.",
 "  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'",
@@ -959,18 +1005,18 @@ sub define_find_cases {
 "  \$ perl -Mojo -E 'say g(\"mojolicious.org\")->dom->at(\"title\")->text'"
          ],
          debug => "find",
-         skip  => "Nth may be confused with nth_group",
+         skip  => "Nth may be confused with nth_in_group",
       },
 
-      # Nth_group.
+      # nth_in_group.
       {
-         name => "find nth_group=Second,First",
+         name => "find nth_in_group=Second,First",
          find => [
             {
-               nth_group => 1,
+               nth_in_group => 1,
             },
             {
-               nth_group => 0,
+               nth_in_group => 0,
             },
          ],
          expected_find => [
@@ -1019,7 +1065,7 @@ sub define_find_cases {
       # keep      => 1,      # Must only be in last section.
       # keep_all  => 1,
       # nth       => 0,      # These options ...
-      # nth_group => 0,      #   are exclusive.
+      # nth_in_group => 0,      #   are exclusive.
 
    ]
 }
