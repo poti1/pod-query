@@ -2,6 +2,7 @@
 
 package Test::ojo;
 use Mojo::Base -base;
+use warnings FATAL => 'all';
 
 sub lol {
    [
@@ -733,21 +734,24 @@ sub define_find_cases {
 
       # Bad input.
       {
-         name          => "No find parameter",
-         expected_find => [],
-         error         => 1,
+         name            => "No find parameter",
+         expected_struct => [],
+         expected_find   => [],
+         error           => 1,
       },
       {
-         name          => "No find parameter hash input",
-         find          => [],
-         expected_find => [],
-         error         => 1,
+         name            => "No find parameter hash input",
+         find            => "",
+         expected_struct => [],
+         expected_find   => [],
+         error           => 1,
       },
 
       # Existing use cases.
       {
-         name => "find_title",
-         find => [
+         name            => "find_title",
+         find            => "head1=NAME[0]/Para[0]",
+         expected_struct => [
             {
                tag  => "head1",
                text => "NAME",
@@ -761,10 +765,11 @@ sub define_find_cases {
          expected_find => [ "ojo - Fun one-liners with Mojo", ],
       },
       {
-         name => "find_method",
-         find => [
+         name            => "find_method",
+         find            => '~^head\d$=(x)[0]**',
+         expected_struct => [
             {
-               tag          => qr/ ^ head \d $ /x,
+               tag          => qr/^head\d$/,
                text         => "x",
                nth_in_group => 0,
                keep_all     => 1,
@@ -782,30 +787,50 @@ sub define_find_cases {
          ],
       },
       {
-         name => "find_method_summary",
-         find => [
+         name            => "find_method_summary",
+         find            => '~^head\d$=(x)[0]/~(?:Data|Para)[0]',
+         expected_struct => [
             {
-               tag          => qr/ ^ head \d $ /x,
+               tag          => qr/^head\d$/,
                text         => "x",
                nth_in_group => 0,
             },
             {
-               tag => qr/ (?: Data | Para ) /x,
+               tag => qr/(?:Data|Para)/,
                nth => 0,
             },
          ],
          expected_find => ["Turn HTML/XML input into Mojo::DOM object."],
       },
       {
-         name => "find_events",
-         find => [
+         name            => "find_events - names",
+         find            => '~^head\d$=EVENTS[0]/~^head\d$*',
+         expected_struct => [
             {
-               tag  => qr/ ^ head \d $ /x,
+               tag  => qr/^head\d$/,
                text => "EVENTS",
                nth  => 0,
             },
             {
-               tag  => qr/ ^ head \d $ /x,
+               tag  => qr/^head\d$/,
+               keep => 1,
+            },
+         ],
+         expected_find => [
+
+         ],
+      },
+      {
+         name            => "find_events",
+         find            => '~^head\d$=EVENTS[0]/~^head\d$*/(Para)[0]',
+         expected_struct => [
+            {
+               tag  => qr/^head\d$/,
+               text => "EVENTS",
+               nth  => 0,
+            },
+            {
+               tag  => qr/^head\d$/,
                keep => 1,
             },
             {
@@ -818,99 +843,206 @@ sub define_find_cases {
 
       # Tag.
       {
-         name => "find tag=head1",
-         find => [
+         name            => "find tag=head1",
+         find            => 'head1',
+         expected_struct => [
             {
                tag => "head1",
             },
          ],
+         expected_find =>
+           [ "NAME", "SYNOPSIS", "DESCRIPTION", "FUNCTIONS", "SEE ALSO", ],
+      },
+      {
+         name            => "find tag=head1, keep=1 (same)",
+         find            => 'head1*',
+         expected_struct => [
+            {
+               tag  => "head1",
+               keep => 1,
+            },
+         ],
+         expected_find =>
+           [ "NAME", "SYNOPSIS", "DESCRIPTION", "FUNCTIONS", "SEE ALSO", ],
+      },
+      {
+         name            => "find tag=head1, keep_all=1",
+         find            => 'head1**',
+         expected_struct => [
+            {
+               tag      => "head1",
+               keep_all => 1,
+            },
+         ],
          expected_find => [
-            "NAME",
-            "ojo - Fun one-liners with Mojo",
+            "NAME:",
+            "",
+            "  ojo - Fun one-liners with Mojo",
+            "",
             "SYNOPSIS",
+            "",
 "  \$ perl -Mojo -E 'say g(\"mojolicious.org\")->dom->at(\"title\")->text'",
+            "",
             "DESCRIPTION",
-"A collection of automatically exported functions for fun Perl one-liners. Ten redirects will be followed by default, you can change this behavior with the MOJO_MAX_REDIRECTS environment variable.",
+            "",
+"  A collection of automatically exported functions for\n  fun Perl one-liners. Ten redirects will be followed by\n  default, you can change this behavior with the\n  MOJO_MAX_REDIRECTS environment variable.",
+            "",
 "  \$ MOJO_MAX_REDIRECTS=0 perl -Mojo -E 'say g(\"example.com\")->code'",
-"Proxy detection is enabled by default, but you can disable it with the MOJO_PROXY environment variable.",
+            "",
+"  Proxy detection is enabled by default, but you can\n  disable it with the MOJO_PROXY environment variable.",
+            "",
             "  \$ MOJO_PROXY=0 perl -Mojo -E 'say g(\"example.com\")->body'",
-"TLS certificate verification can be disabled with the MOJO_INSECURE environment variable.",
+            "",
+"  TLS certificate verification can be disabled with the\n  MOJO_INSECURE environment variable.",
+            "",
 "  \$ MOJO_INSECURE=1 perl -Mojo -E 'say g(\"https://127.0.0.1:3000\")->body'",
-            "Every ojo one-liner is also a Mojolicious::Lite application.",
+            "",
+            "  Every ojo one-liner is also a Mojolicious::Lite\n  application.",
+            "",
 "  \$ perl -Mojo -E 'get \"/\" => {inline => \"%= time\"}; app->start' get /",
-"On Perl 5.20+ subroutine signatures will be enabled automatically.",
+            "",
+"  On Perl 5.20+ subroutine signatures will be enabled\n  automatically.",
+            "",
 "  \$ perl -Mojo -E 'a(sub (\$c) { \$c->render(text => \"Hello!\") })->start' get /",
-"If it is not already defined, the MOJO_LOG_LEVEL environment variable will be set to fatal.",
+            "",
+"  If it is not already defined, the MOJO_LOG_LEVEL\n  environment variable will be set to fatal.",
+            "",
             "FUNCTIONS",
-"ojo implements the following functions, which are automatically exported.",
+            "",
+"  ojo implements the following functions, which are\n  automatically exported.",
+            "",
             "a",
+            "",
 "  my \$app = a('/hello' => sub { \$_->render(json => {hello => 'world'}) });",
-"Create a route with \"any\" in Mojolicious::Lite and return the current Mojolicious::Lite object. The current controller object is also available to actions as \$_. See also Mojolicious::Guides::Tutorial for more argument variations.",
+            "",
+"  Create a route with \"any\" in Mojolicious::Lite and\n  return the current Mojolicious::Lite object. The\n  current controller object is also available to actions\n  as \$_. See also Mojolicious::Guides::Tutorial for more\n  argument variations.",
+            "",
 "  \$ perl -Mojo -E 'a(\"/hello\" => {text => \"Hello Mojo!\"})->start' daemon",
+            "",
             "b",
+            "",
             "  my \$stream = b('lalala');",
-            "Turn string into a Mojo::ByteStream object.",
+            "",
+            "  Turn string into a Mojo::ByteStream object.",
+            "",
 "  \$ perl -Mojo -E 'b(g(\"mojolicious.org\")->body)->html_unescape->say'",
+            "",
             "c",
+            "",
             "  my \$collection = c(1, 2, 3);",
-            "Turn list into a Mojo::Collection object.",
+            "",
+            "  Turn list into a Mojo::Collection object.",
+            "",
             "d",
+            "",
 "  my \$res = d('example.com');\n  my \$res = d('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = d('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = d('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});",
-"Perform DELETE request with \"delete\" in Mojo::UserAgent and return resulting Mojo::Message::Response object.",
+            "",
+"  Perform DELETE request with \"delete\" in\n  Mojo::UserAgent and return resulting\n  Mojo::Message::Response object.",
+            "",
             "f",
+            "",
             "  my \$path = f('/home/sri/foo.txt');",
-            "Turn string into a Mojo::File object.",
+            "",
+            "  Turn string into a Mojo::File object.",
+            "",
             "  \$ perl -Mojo -E 'say r j f(\"hello.json\")->slurp'",
+            "",
             "g",
+            "",
 "  my \$res = g('example.com');\n  my \$res = g('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = g('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = g('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});",
-"Perform GET request with \"get\" in Mojo::UserAgent and return resulting Mojo::Message::Response object.",
+            "",
+"  Perform GET request with \"get\" in Mojo::UserAgent and\n  return resulting Mojo::Message::Response object.",
+            "",
 "  \$ perl -Mojo -E 'say g(\"mojolicious.org\")->dom(\"h1\")->map(\"text\")->join(\"\\n\")'",
+            "",
             "h",
+            "",
 "  my \$res = h('example.com');\n  my \$res = h('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = h('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = h('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});",
-"Perform HEAD request with \"head\" in Mojo::UserAgent and return resulting Mojo::Message::Response object.",
+            "",
+"  Perform HEAD request with \"head\" in Mojo::UserAgent\n  and return resulting Mojo::Message::Response object.",
+            "",
             "j",
+            "",
 "  my \$bytes = j([1, 2, 3]);\n  my \$bytes = j({foo => 'bar'});\n  my \$value = j(\$bytes);",
-"Encode Perl data structure or decode JSON with \"j\" in Mojo::JSON.",
+            "",
+"  Encode Perl data structure or decode JSON with \"j\" in\n  Mojo::JSON.",
+            "",
 "  \$ perl -Mojo -E 'f(\"hello.json\")->spurt(j {hello => \"world!\"})'",
+            "",
             "l",
+            "",
             "  my \$url = l('https://mojolicious.org');",
-            "Turn a string into a Mojo::URL object.",
+            "",
+            "  Turn a string into a Mojo::URL object.",
+            "",
 "  \$ perl -Mojo -E 'say l(\"/perldoc\")->to_abs(l(\"https://mojolicious.org\"))'",
+            "",
             "n",
+            "",
             "  n {...};\n  n {...} 100;",
-"Benchmark block and print the results to STDERR, with an optional number of iterations, which defaults to 1.",
+            "",
+"  Benchmark block and print the results to STDERR, with\n  an optional number of iterations, which defaults to 1.",
+            "",
             "  \$ perl -Mojo -E 'n { say g(\"mojolicious.org\")->code }'",
+            "",
             "o",
+            "",
 "  my \$res = o('example.com');\n  my \$res = o('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = o('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = o('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});",
-"Perform OPTIONS request with \"options\" in Mojo::UserAgent and return resulting Mojo::Message::Response object.",
+            "",
+"  Perform OPTIONS request with \"options\" in\n  Mojo::UserAgent and return resulting\n  Mojo::Message::Response object.",
+            "",
             "p",
+            "",
 "  my \$res = p('example.com');\n  my \$res = p('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = p('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = p('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});",
-"Perform POST request with \"post\" in Mojo::UserAgent and return resulting Mojo::Message::Response object.",
+            "",
+"  Perform POST request with \"post\" in Mojo::UserAgent\n  and return resulting Mojo::Message::Response object.",
+            "",
             "r",
+            "",
             "  my \$perl = r({data => 'structure'});",
-            "Dump a Perl data structure with \"dumper\" in Mojo::Util.",
+            "",
+            "  Dump a Perl data structure with \"dumper\" in\n  Mojo::Util.",
+            "",
             "  perl -Mojo -E 'say r g(\"example.com\")->headers->to_hash'",
+            "",
             "t",
+            "",
 "  my \$res = t('example.com');\n  my \$res = t('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = t('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = t('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});",
-"Perform PATCH request with \"patch\" in Mojo::UserAgent and return resulting Mojo::Message::Response object.",
+            "",
+"  Perform PATCH request with \"patch\" in Mojo::UserAgent\n  and return resulting Mojo::Message::Response object.",
+            "",
             "u",
+            "",
 "  my \$res = u('example.com');\n  my \$res = u('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = u('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = u('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});",
-"Perform PUT request with \"put\" in Mojo::UserAgent and return resulting Mojo::Message::Response object.",
+            "",
+"  Perform PUT request with \"put\" in Mojo::UserAgent and\n  return resulting Mojo::Message::Response object.",
+            "",
             "x",
+            "",
             "  my \$dom = x('<div>Hello!</div>');",
-            "Turn HTML/XML input into Mojo::DOM object.",
+            "",
+            "  Turn HTML/XML input into Mojo::DOM object.",
+            "",
 "  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'",
+            "",
             "x2()",
+            "",
             "  my \$dom = x('<div>Hello!</div>');",
-            "Turn HTML/XML input into Mojo::DOM object.",
+            "",
+            "  Turn HTML/XML input into Mojo::DOM object.",
+            "",
 "  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'",
+            "",
             "SEE ALSO",
-            "Mojolicious, Mojolicious::Guides, https://mojolicious.org."
+            "",
+            "  Mojolicious, Mojolicious::Guides,\n  https://mojolicious.org.",
+            ""
          ],
       },
       {
-         name => "find tag=Para",
-         find => [
+         name            => "find tag=Para",
+         find            => 'Para',
+         expected_struct => [
             {
                tag => "Para",
             },
@@ -930,8 +1062,9 @@ sub define_find_cases {
 
       # Tag, Nth.
       {
-         name => "find tag=Para, nth=0",
-         find => [
+         name            => "find tag=Para, nth=0",
+         find            => 'Para[0]',
+         expected_struct => [
             {
                tag => "Para",
                nth => 0,
@@ -940,8 +1073,9 @@ sub define_find_cases {
          expected_find => [ "ojo - Fun one-liners with Mojo", ],
       },
       {
-         name => "find tag=Para, nth=-1",
-         find => [
+         name            => "find tag=Para, nth=-1",
+         find            => 'Para[-1]',
+         expected_struct => [
             {
                tag => "Para",
                nth => -1,
@@ -953,85 +1087,171 @@ sub define_find_cases {
 
       # Tag, Text.
       {
-         name => "find tag=Para, text=Literal",
-         find => [
+         name            => "find tag=Para, text=Literal",
+         find            => 'Para=ojo - Fun one-liners with Mojo',
+         expected_struct => [
             {
                tag  => "Para",
                text => "ojo - Fun one-liners with Mojo",
             },
          ],
          expected_find => [ "ojo - Fun one-liners with Mojo", ],
-         debug         => "find",
-         skip => "Currently the last group's sub tag is used (not the first)",
       },
       {
-         name => "find tag=Para, text=Any,Literal",
-         find => [
-            {},
+         name            => "find tag=Para, text='Literal'",
+         find            => 'Para="ojo - Fun one-liners with Mojo"',
+         expected_struct => [
             {
                tag  => "Para",
                text => "ojo - Fun one-liners with Mojo",
             },
          ],
          expected_find => [ "ojo - Fun one-liners with Mojo", ],
-         debug         => "find",
-         skip => "Currently the last group's sub tag is used (not the first)",
+      },
+      {
+         name            => "find tag=Para, text=Any,Literal",
+         find            => '~./Para=ojo - Fun one-liners with Mojo',
+         expected_struct => [
+            {
+               tag => qr/./,
+            },
+            {
+               tag  => "Para",
+               text => "ojo - Fun one-liners with Mojo",
+            },
+         ],
+         expected_find => [ "ojo - Fun one-liners with Mojo", ],
+      },
+
+      # find_title - alternatives.
+      {
+         name            => "find_title - alt 1",
+         find            => 'head1=NAME[0]/Para[0]',
+         expected_struct => [
+            {
+               tag  => "head1",
+               text => "NAME",
+               nth  => 0,
+            },
+            {
+               tag => "Para",
+               nth => 0,
+            },
+         ],
+         expected_find => [ "ojo - Fun one-liners with Mojo", ],
+      },
+      {
+         name            => "find_title - alt 2 - last keep/star is optional",
+         find            => 'head1=NAME[0]/Para[0]',
+         expected_struct => [
+            {
+               tag  => "head1",
+               text => "NAME",
+               nth  => 0,
+            },
+            {
+               tag => "Para",
+               nth => 0,
+            },
+         ],
+         expected_find => [ "ojo - Fun one-liners with Mojo", ],
+      },
+      {
+         name => "find_title - alt 3 - same without index (although slower)",
+         find => 'head1=NAME[0]/Para[0]',
+         expected_struct => [
+            {
+               tag  => "head1",
+               text => "NAME",
+               nth  => 0,
+            },
+            {
+               tag => "Para",
+               nth => 0,
+            },
+         ],
+         expected_find => ["ojo - Fun one-liners with Mojo"],
       },
 
       # Nth.
       {
-         name => "find nth=First,First",
-         find => [
+         name            => "find nth=First,First",
+         find            => '~.[0]/~.[0]',
+         expected_struct => [
             {
+               tag => qr/./,
                nth => 0,
             },
             {
+               tag => qr/./,
                nth => 0,
             },
          ],
-         expected_find => [ "ojo - Fun one-liners with Mojo", ],
+         expected_find => ["ojo - Fun one-liners with Mojo"],
       },
       {
-         name => "find nth=Second,First",
-         find => [
+         name            => "find nth=Second,First",
+         find            => '~.[1]/~.[0]',
+         expected_struct => [
             {
+               tag => qr/./,
                nth => 1,
             },
             {
+               tag => qr/./,
                nth => 0,
             },
          ],
          expected_find => [
 "  \$ perl -Mojo -E 'say g(\"mojolicious.org\")->dom->at(\"title\")->text'"
          ],
-         debug => "find",
-         skip  => "Nth may be confused with nth_in_group",
       },
 
       # nth_in_group.
       {
-         name => "find nth_in_group=Second,First",
-         find => [
+         name            => "find nth=Second,First",
+         find            => '~.[1]/~.[0]',
+         expected_struct => [
             {
-               nth_in_group => 1,
+               tag => qr/./,
+               nth => 1,
             },
             {
-               nth_in_group => 0,
+               tag => qr/./,
+               nth => 0,
             },
          ],
          expected_find => [
 "  \$ perl -Mojo -E 'say g(\"mojolicious.org\")->dom->at(\"title\")->text'"
          ],
-         debug => "find",
-         skip  =>
-"Code for nth needs to be restructured to make sure nth really means nth found.",
+      },
+
+      # TODO: 2
+
+      {
+         name =>
+"find nth_in_group=Second (no effect since not reach index), nth=First",
+         find            => '(~.)[1]/~.[0]',
+         expected_struct => [
+            {
+               tag          => qr/./,
+               nth_in_group => 1,
+            },
+            {
+               tag => qr/./,
+               nth => 0,
+            },
+         ],
+         expected_find => ["ojo - Fun one-liners with Mojo"],
       },
 
       # Other.
       {
-         name => "find tag=Para, text=Any,First,Literal",
-         find => [
+         name            => "find tag=Para, text=Any,First,Literal",
+         find            => '~.[0]/Para[0]',
+         expected_struct => [
             {
+               tag => qr/./,
                nth => 0,
             },
             {
@@ -1042,14 +1262,13 @@ sub define_find_cases {
             },
          ],
          expected_find => [ "ojo - Fun one-liners with Mojo", ],
-
-         # debug         => "find",
-         # skip => "Currently the last group's sub tag is used (not the first)",
       },
       {
-         name => "find tag=Para, text=Any,First,Literal,First",
-         find => [
+         name            => "find tag=Para, text=Any,First,Literal,First",
+         find            => '~.[0]/Para[0]',
+         expected_struct => [
             {
+               tag => qr/./,
                nth => 0,
             },
             {
@@ -1057,7 +1276,7 @@ sub define_find_cases {
                nth => 0,
             },
          ],
-         expected_find => [ "ojo - Fun one-liners with Mojo", ],
+         expected_find => ["ojo - Fun one-liners with Mojo"],
       },
 
       # tag       => "TAG",

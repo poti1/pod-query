@@ -108,12 +108,26 @@ sub run {
       }
 
       # say dumper [ $query->find_method( $case->{method} ) ];
-      my $name     = "find - $case->{name}";
-      my $find     = $case->{find} // [];
-      my $expected = $case->{expected_find};
+      my $name = "find - $case->{name}";
 
-      # say dumper { find => $find };
-      my $scalar_find = eval { $query->find( @$find ) };
+      if ( ref $case->{find} ) {
+         fail( "Update for find string and exptected_struct: $name" );
+         next;
+      }
+
+      my $find = $case->{find};
+
+      my $struct = Pod::Query->_query_string_to_struct( $find );
+
+      say dumper $struct
+        unless is_deeply(
+         $struct,
+         $case->{expected_struct},
+         "String to struct - $name",
+        );
+
+      my $expected    = $case->{expected_find};
+      my $scalar_find = eval { $query->find( $find ) };
 
       if ( $@ ) {
          $case->{error} ? pass( $name ) : fail( $name );
@@ -124,7 +138,7 @@ sub run {
 
       {
          local $Pod::Query::DEBUG_FIND = 1 if $debug eq "find";
-         my @list_find = $query->find( @$find );
+         my @list_find = $query->find( $find );
          say dumper \@list_find
            unless is_deeply( \@list_find, $expected, "$name - list context", );
       };

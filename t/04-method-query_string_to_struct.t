@@ -259,15 +259,124 @@ my @cases = (
          },
       ],
    },
+
+   # Scenarios - using quotes.
+   {
+      name                  => "find_method_summary - quotes - error",
+      query_string          => q(hea=d1'='Text with [0]\b'),
+      expected_query_struct => [],
+   },
+   {
+      name                  => "find_method_summary - quotes - error 2",
+      query_string          => q(hea=d'1='Text with [0]\b'),
+      expected_query_struct => [],
+   },
+   {
+      name         => "find_method_summary - single quotes - equal sign",
+      query_string => q('='),
+      expected_query_struct => [
+         {
+            tag => q(=),
+         },
+      ],
+   },
+   {
+      name         => "find_method_summary - double quotes - equal sign",
+      query_string => q("="),
+      expected_query_struct => [
+         {
+            tag => q(=),
+         },
+      ],
+   },
+   {
+      name => "find_method_summary - quotes - head1 - backslash is literal",
+      query_string          => q(hea\=d1='Text with [0]\b'),
+      expected_query_struct => [
+         {
+            tag  => q(hea\=d1),
+            text => 'Text with [0]\b',
+         },
+      ],
+   },
+   {
+      name                  => "find_method_summary - inner quotes are kept",
+      query_string          => q(he'a=d'1='Text with [0]\b'),
+      expected_query_struct => [
+         {
+            tag  => q(he'a=d'1),
+            text => 'Text with [0]\b',
+         },
+      ],
+   },
+   {
+      name                  => "find_method_summary - quotes - head1",
+      query_string          => q('hea=d1'='Text with [0]\b'),
+      expected_query_struct => [
+         {
+            tag  => 'hea=d1',
+            text => 'Text with [0]\b',
+         },
+      ],
+   },
+   {
+      name                  => "find_method_summary - quotes - head1 regex 1",
+      query_string          => q(~'head1'),
+      expected_query_struct => [
+         {
+            tag => qr/'head1'/,
+         },
+      ],
+   },
+   {
+      name                  => "find_method_summary - quotes - head1 regex 2",
+      query_string          => q('~head1'),
+      expected_query_struct => [
+         {
+            tag => qr/head1/,
+         },
+      ],
+   },
+   {
+      name                  => "find_method_summary - quotes precendence 1",
+      query_string          => q(~head=~'meth/od'\b[0]/(~'Da=ta'|Para)[0]),
+      expected_query_struct => [
+         {
+            tag  => qr/head/,
+            text => qr{'meth/od'\b},
+            nth  => 0,
+         },
+         {
+            tag          => qr/'Da=ta'|Para/,
+            nth_in_group => 0,
+         },
+      ],
+   },
+   {
+      name                  => "find_method_summary - quotes precendence 2",
+      query_string          => q(~head='~meth/od\b'[0]/('~Da=ta|Para')[0]),
+      expected_query_struct => [
+         {
+            tag  => qr/head/,
+            text => qr{meth/od\b},
+            nth  => 0,
+         },
+         {
+            tag          => qr/Da=ta|Para/,
+            nth_in_group => 0,
+         },
+      ],
+   },
 );
 
 
 for my $case ( @cases ) {
-   is_deeply(
+   last
+     unless is_deeply(
       Pod::Query->_query_string_to_struct( $case->{query_string} ),
       $case->{expected_query_struct},
       "query to string: $case->{name}",
-   );
+     );
 }
 
 done_testing();
