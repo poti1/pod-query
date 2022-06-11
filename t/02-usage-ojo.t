@@ -234,7 +234,6 @@ sub expected_tree {
                     "tag"  => "Verbatim",
                     "text" =>
 "  \$ perl -Mojo -E 'say g(\"mojolicious.org\")->dom->at(\"title\")->text'"
-
                 }
             ],
             "tag"  => "head1",
@@ -246,67 +245,56 @@ sub expected_tree {
                     "tag"  => "Para",
                     "text" =>
 "A collection of automatically exported functions for fun Perl one-liners. Ten redirects will be followed by default, you can change this behavior with the MOJO_MAX_REDIRECTS environment variable."
-
                 },
                 {
                     "tag"  => "Verbatim",
                     "text" =>
 "  \$ MOJO_MAX_REDIRECTS=0 perl -Mojo -E 'say g(\"example.com\")->code'"
-
                 },
                 {
                     "tag"  => "Para",
                     "text" =>
 "Proxy detection is enabled by default, but you can disable it with the MOJO_PROXY environment variable."
-
                 },
                 {
                     "tag"  => "Verbatim",
                     "text" =>
 "  \$ MOJO_PROXY=0 perl -Mojo -E 'say g(\"example.com\")->body'"
-
                 },
                 {
                     "tag"  => "Para",
                     "text" =>
 "TLS certificate verification can be disabled with the MOJO_INSECURE environment variable."
-
                 },
                 {
                     "tag"  => "Verbatim",
                     "text" =>
 "  \$ MOJO_INSECURE=1 perl -Mojo -E 'say g(\"https://127.0.0.1:3000\")->body'"
-
                 },
                 {
                     "tag"  => "Para",
                     "text" =>
 "Every ojo one-liner is also a Mojolicious::Lite application."
-
                 },
                 {
                     "tag"  => "Verbatim",
                     "text" =>
 "  \$ perl -Mojo -E 'get \"/\" => {inline => \"%= time\"}; app->start' get /"
-
                 },
                 {
                     "tag"  => "Para",
                     "text" =>
 "On Perl 5.20+ subroutine signatures will be enabled automatically."
-
                 },
                 {
                     "tag"  => "Verbatim",
                     "text" =>
 "  \$ perl -Mojo -E 'a(sub (\$c) { \$c->render(text => \"Hello!\") })->start' get /"
-
                 },
                 {
                     "tag"  => "Para",
                     "text" =>
 "If it is not already defined, the MOJO_LOG_LEVEL environment variable will be set to fatal."
-
                 }
             ],
             "tag"  => "head1",
@@ -318,7 +306,6 @@ sub expected_tree {
                     "tag"  => "Para",
                     "text" =>
 "ojo implements the following functions, which are automatically exported."
-
                 },
                 {
                     "kids" => [
@@ -326,19 +313,16 @@ sub expected_tree {
                             "tag"  => "Verbatim",
                             "text" =>
 "  my \$app = a('/hello' => sub { \$_->render(json => {hello => 'world'}) });"
-
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
 "Create a route with \"any\" in Mojolicious::Lite and return the current Mojolicious::Lite object. The current controller object is also available to actions as \$_. See also Mojolicious::Guides::Tutorial for more argument variations."
-
                         },
                         {
                             "tag"  => "Verbatim",
                             "text" =>
 "  \$ perl -Mojo -E 'a(\"/hello\" => {text => \"Hello Mojo!\"})->start' daemon"
-
                         }
                     ],
                     "tag"  => "head2",
@@ -359,7 +343,6 @@ sub expected_tree {
                             "tag"  => "Verbatim",
                             "text" =>
 "  \$ perl -Mojo -E 'b(g(\"mojolicious.org\")->body)->html_unescape->say'"
-
                         }
                     ],
                     "tag"  => "head2",
@@ -386,13 +369,11 @@ sub expected_tree {
                             "tag"  => "Verbatim",
                             "text" =>
 "  my \$res = d('example.com');\n  my \$res = d('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = d('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = d('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
 "Perform DELETE request with \"delete\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-
                         }
                     ],
                     "tag"  => "head2",
@@ -412,7 +393,6 @@ sub expected_tree {
                             "tag"  => "Verbatim",
                             "text" =>
 "  \$ perl -Mojo -E 'say r j f(\"hello.json\")->slurp'"
-
                         }
                     ],
                     "tag"  => "head2",
@@ -424,19 +404,16 @@ sub expected_tree {
                             "tag"  => "Verbatim",
                             "text" =>
 "  my \$res = g('example.com');\n  my \$res = g('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = g('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = g('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
 "Perform GET request with \"get\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-
                         },
                         {
                             "tag"  => "Verbatim",
                             "text" =>
 "  \$ perl -Mojo -E 'say g(\"mojolicious.org\")->dom(\"h1\")->map(\"text\")->join(\"\\n\")'"
-
                         }
                     ],
                     "tag"  => "head2",
@@ -448,13 +425,11 @@ sub expected_tree {
                             "tag"  => "Verbatim",
                             "text" =>
 "  my \$res = h('example.com');\n  my \$res = h('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = h('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = h('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
 "Perform HEAD request with \"head\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-
                         }
                     ],
                     "tag"  => "head2",
@@ -464,19 +439,18 @@ sub expected_tree {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => "  my \$bytes = j([1, 2, 3]);\n  my \$bytes = j({foo => 'bar'});\n  my \$value = j(\$bytes);"
+                            "text" =>
+"  my \$bytes = j([1, 2, 3]);\n  my \$bytes = j({foo => 'bar'});\n  my \$value = j(\$bytes);"
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
 "Encode Perl data structure or decode JSON with \"j\" in Mojo::JSON."
-
                         },
                         {
                             "tag"  => "Verbatim",
                             "text" =>
 "  \$ perl -Mojo -E 'f(\"hello.json\")->spurt(j {hello => \"world!\"})'"
-
                         }
                     ],
                     "tag"  => "head2",
@@ -497,7 +471,6 @@ sub expected_tree {
                             "tag"  => "Verbatim",
                             "text" =>
 "  \$ perl -Mojo -E 'say l(\"/perldoc\")->to_abs(l(\"https://mojolicious.org\"))'"
-
                         }
                     ],
                     "tag"  => "head2",
@@ -513,13 +486,11 @@ sub expected_tree {
                             "tag"  => "Para",
                             "text" =>
 "Benchmark block and print the results to STDERR, with an optional number of iterations, which defaults to 1."
-
                         },
                         {
                             "tag"  => "Verbatim",
                             "text" =>
 "  \$ perl -Mojo -E 'n { say g(\"mojolicious.org\")->code }'"
-
                         }
                     ],
                     "tag"  => "head2",
@@ -531,13 +502,11 @@ sub expected_tree {
                             "tag"  => "Verbatim",
                             "text" =>
 "  my \$res = o('example.com');\n  my \$res = o('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = o('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = o('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
 "Perform OPTIONS request with \"options\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-
                         }
                     ],
                     "tag"  => "head2",
@@ -549,13 +518,11 @@ sub expected_tree {
                             "tag"  => "Verbatim",
                             "text" =>
 "  my \$res = p('example.com');\n  my \$res = p('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = p('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = p('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
 "Perform POST request with \"post\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-
                         }
                     ],
                     "tag"  => "head2",
@@ -565,20 +532,17 @@ sub expected_tree {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" =>
-                              "  my \$perl = r({data => 'structure'});"
+                            "text" => "  my \$perl = r({data => 'structure'});"
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
 "Dump a Perl data structure with \"dumper\" in Mojo::Util."
-
                         },
                         {
                             "tag"  => "Verbatim",
                             "text" =>
 "  perl -Mojo -E 'say r g(\"example.com\")->headers->to_hash'"
-
                         }
                     ],
                     "tag"  => "head2",
@@ -590,13 +554,11 @@ sub expected_tree {
                             "tag"  => "Verbatim",
                             "text" =>
 "  my \$res = t('example.com');\n  my \$res = t('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = t('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = t('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
 "Perform PATCH request with \"patch\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-
                         }
                     ],
                     "tag"  => "head2",
@@ -608,13 +570,11 @@ sub expected_tree {
                             "tag"  => "Verbatim",
                             "text" =>
 "  my \$res = u('example.com');\n  my \$res = u('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = u('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = u('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
 "Perform PUT request with \"put\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-
                         }
                     ],
                     "tag"  => "head2",
@@ -629,13 +589,12 @@ sub expected_tree {
                         {
                             "tag"  => "Para",
                             "text" =>
-                              ["Turn HTML/XML input into Mojo::DOM object."]
+                              "Turn HTML/XML input into Mojo::DOM object."
                         },
                         {
                             "tag"  => "Verbatim",
                             "text" =>
 "  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'"
-
                         }
                     ],
                     "tag"  => "head2",
@@ -650,13 +609,12 @@ sub expected_tree {
                         {
                             "tag"  => "Para",
                             "text" =>
-                              ["Turn HTML/XML input into Mojo::DOM object."]
+                              "Turn HTML/XML input into Mojo::DOM object."
                         },
                         {
                             "tag"  => "Verbatim",
                             "text" =>
 "  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'"
-
                         }
                     ],
                     "tag"  => "head2",
@@ -672,7 +630,6 @@ sub expected_tree {
                     "tag"  => "Para",
                     "text" =>
 "Mojolicious, Mojolicious::Guides, https://mojolicious.org."
-
                 }
             ],
             "tag"  => "head1",

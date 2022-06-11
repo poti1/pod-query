@@ -43,7 +43,7 @@ sub run {
     is_deeply( $query->{path}, "$class_dir/$class.pm", "path" );
 
     # tree.
-    say dumper $query->{tree} unless
+    # say dumper $query->{tree} unless
     is_deeply( $query->{tree}, $obj->expected_tree, "tree" );
 
     # exit;
