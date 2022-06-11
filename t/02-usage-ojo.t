@@ -222,411 +222,409 @@ sub expected_tree {
             "kids" => [
                 {
                     "tag"  => "Para",
-                    "text" => ["ojo - Fun one-liners with Mojo"]
+                    "text" => "ojo - Fun one-liners with Mojo"
                 }
             ],
             "tag"  => "head1",
-            "text" => ["NAME"]
+            "text" => "NAME"
         },
         {
             "kids" => [
                 {
                     "tag"  => "Verbatim",
-                    "text" => [
+                    "text" =>
 "  \$ perl -Mojo -E 'say g(\"mojolicious.org\")->dom->at(\"title\")->text'"
-                    ]
+
                 }
             ],
             "tag"  => "head1",
-            "text" => ["SYNOPSIS"]
+            "text" => "SYNOPSIS"
         },
         {
             "kids" => [
                 {
                     "tag"  => "Para",
-                    "text" => [
+                    "text" =>
 "A collection of automatically exported functions for fun Perl one-liners. Ten redirects will be followed by default, you can change this behavior with the MOJO_MAX_REDIRECTS environment variable."
-                    ]
+
                 },
                 {
                     "tag"  => "Verbatim",
-                    "text" => [
+                    "text" =>
 "  \$ MOJO_MAX_REDIRECTS=0 perl -Mojo -E 'say g(\"example.com\")->code'"
-                    ]
+
                 },
                 {
                     "tag"  => "Para",
-                    "text" => [
+                    "text" =>
 "Proxy detection is enabled by default, but you can disable it with the MOJO_PROXY environment variable."
-                    ]
+
                 },
                 {
                     "tag"  => "Verbatim",
-                    "text" => [
+                    "text" =>
 "  \$ MOJO_PROXY=0 perl -Mojo -E 'say g(\"example.com\")->body'"
-                    ]
+
                 },
                 {
                     "tag"  => "Para",
-                    "text" => [
+                    "text" =>
 "TLS certificate verification can be disabled with the MOJO_INSECURE environment variable."
-                    ]
+
                 },
                 {
                     "tag"  => "Verbatim",
-                    "text" => [
+                    "text" =>
 "  \$ MOJO_INSECURE=1 perl -Mojo -E 'say g(\"https://127.0.0.1:3000\")->body'"
-                    ]
+
                 },
                 {
                     "tag"  => "Para",
-                    "text" => [
+                    "text" =>
 "Every ojo one-liner is also a Mojolicious::Lite application."
-                    ]
+
                 },
                 {
                     "tag"  => "Verbatim",
-                    "text" => [
+                    "text" =>
 "  \$ perl -Mojo -E 'get \"/\" => {inline => \"%= time\"}; app->start' get /"
-                    ]
+
                 },
                 {
                     "tag"  => "Para",
-                    "text" => [
+                    "text" =>
 "On Perl 5.20+ subroutine signatures will be enabled automatically."
-                    ]
+
                 },
                 {
                     "tag"  => "Verbatim",
-                    "text" => [
+                    "text" =>
 "  \$ perl -Mojo -E 'a(sub (\$c) { \$c->render(text => \"Hello!\") })->start' get /"
-                    ]
+
                 },
                 {
                     "tag"  => "Para",
-                    "text" => [
+                    "text" =>
 "If it is not already defined, the MOJO_LOG_LEVEL environment variable will be set to fatal."
-                    ]
+
                 }
             ],
             "tag"  => "head1",
-            "text" => ["DESCRIPTION"]
+            "text" => "DESCRIPTION"
         },
         {
             "kids" => [
                 {
                     "tag"  => "Para",
-                    "text" => [
+                    "text" =>
 "ojo implements the following functions, which are automatically exported."
-                    ]
+
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  my \$app = a('/hello' => sub { \$_->render(json => {hello => 'world'}) });"
-                            ]
+
                         },
                         {
                             "tag"  => "Para",
-                            "text" => [
+                            "text" =>
 "Create a route with \"any\" in Mojolicious::Lite and return the current Mojolicious::Lite object. The current controller object is also available to actions as \$_. See also Mojolicious::Guides::Tutorial for more argument variations."
-                            ]
+
                         },
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  \$ perl -Mojo -E 'a(\"/hello\" => {text => \"Hello Mojo!\"})->start' daemon"
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["a"]
+                    "text" => "a"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => ["  my \$stream = b('lalala');"]
+                            "text" => "  my \$stream = b('lalala');"
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
-                              ["Turn string into a Mojo::ByteStream object."]
+                              "Turn string into a Mojo::ByteStream object."
                         },
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  \$ perl -Mojo -E 'b(g(\"mojolicious.org\")->body)->html_unescape->say'"
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["b"]
+                    "text" => "b"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => ["  my \$collection = c(1, 2, 3);"]
+                            "text" => "  my \$collection = c(1, 2, 3);"
                         },
                         {
                             "tag"  => "Para",
                             "text" =>
-                              ["Turn list into a Mojo::Collection object."]
+                              "Turn list into a Mojo::Collection object."
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["c"]
+                    "text" => "c"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  my \$res = d('example.com');\n  my \$res = d('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = d('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = d('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-                            ]
+
                         },
                         {
                             "tag"  => "Para",
-                            "text" => [
+                            "text" =>
 "Perform DELETE request with \"delete\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["d"]
+                    "text" => "d"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => ["  my \$path = f('/home/sri/foo.txt');"]
+                            "text" => "  my \$path = f('/home/sri/foo.txt');"
                         },
                         {
                             "tag"  => "Para",
-                            "text" => ["Turn string into a Mojo::File object."]
+                            "text" => "Turn string into a Mojo::File object."
                         },
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  \$ perl -Mojo -E 'say r j f(\"hello.json\")->slurp'"
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["f"]
+                    "text" => "f"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  my \$res = g('example.com');\n  my \$res = g('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = g('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = g('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-                            ]
+
                         },
                         {
                             "tag"  => "Para",
-                            "text" => [
+                            "text" =>
 "Perform GET request with \"get\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-                            ]
+
                         },
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  \$ perl -Mojo -E 'say g(\"mojolicious.org\")->dom(\"h1\")->map(\"text\")->join(\"\\n\")'"
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["g"]
+                    "text" => "g"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  my \$res = h('example.com');\n  my \$res = h('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = h('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = h('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-                            ]
+
                         },
                         {
                             "tag"  => "Para",
-                            "text" => [
+                            "text" =>
 "Perform HEAD request with \"head\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["h"]
+                    "text" => "h"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
-"  my \$bytes = j([1, 2, 3]);\n  my \$bytes = j({foo => 'bar'});\n  my \$value = j(\$bytes);"
-                            ]
+                            "text" => "  my \$bytes = j([1, 2, 3]);\n  my \$bytes = j({foo => 'bar'});\n  my \$value = j(\$bytes);"
                         },
                         {
                             "tag"  => "Para",
-                            "text" => [
+                            "text" =>
 "Encode Perl data structure or decode JSON with \"j\" in Mojo::JSON."
-                            ]
+
                         },
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  \$ perl -Mojo -E 'f(\"hello.json\")->spurt(j {hello => \"world!\"})'"
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["j"]
+                    "text" => "j"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
                             "text" =>
-                              ["  my \$url = l('https://mojolicious.org');"]
+                              "  my \$url = l('https://mojolicious.org');"
                         },
                         {
                             "tag"  => "Para",
-                            "text" => ["Turn a string into a Mojo::URL object."]
+                            "text" => "Turn a string into a Mojo::URL object."
                         },
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  \$ perl -Mojo -E 'say l(\"/perldoc\")->to_abs(l(\"https://mojolicious.org\"))'"
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["l"]
+                    "text" => "l"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => ["  n {...};\n  n {...} 100;"]
+                            "text" => "  n {...};\n  n {...} 100;"
                         },
                         {
                             "tag"  => "Para",
-                            "text" => [
+                            "text" =>
 "Benchmark block and print the results to STDERR, with an optional number of iterations, which defaults to 1."
-                            ]
+
                         },
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  \$ perl -Mojo -E 'n { say g(\"mojolicious.org\")->code }'"
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["n"]
+                    "text" => "n"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  my \$res = o('example.com');\n  my \$res = o('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = o('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = o('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-                            ]
+
                         },
                         {
                             "tag"  => "Para",
-                            "text" => [
+                            "text" =>
 "Perform OPTIONS request with \"options\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["o"]
+                    "text" => "o"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  my \$res = p('example.com');\n  my \$res = p('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = p('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = p('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-                            ]
+
                         },
                         {
                             "tag"  => "Para",
-                            "text" => [
+                            "text" =>
 "Perform POST request with \"post\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["p"]
+                    "text" => "p"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
                             "text" =>
-                              ["  my \$perl = r({data => 'structure'});"]
+                              "  my \$perl = r({data => 'structure'});"
                         },
                         {
                             "tag"  => "Para",
-                            "text" => [
+                            "text" =>
 "Dump a Perl data structure with \"dumper\" in Mojo::Util."
-                            ]
+
                         },
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  perl -Mojo -E 'say r g(\"example.com\")->headers->to_hash'"
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["r"]
+                    "text" => "r"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  my \$res = t('example.com');\n  my \$res = t('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = t('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = t('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-                            ]
+
                         },
                         {
                             "tag"  => "Para",
-                            "text" => [
+                            "text" =>
 "Perform PATCH request with \"patch\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["t"]
+                    "text" => "t"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  my \$res = u('example.com');\n  my \$res = u('http://example.com' => {Accept => '*/*'} => 'Hi!');\n  my \$res = u('http://example.com' => {Accept => '*/*'} => form => {a => 'b'});\n  my \$res = u('http://example.com' => {Accept => '*/*'} => json => {a => 'b'});"
-                            ]
+
                         },
                         {
                             "tag"  => "Para",
-                            "text" => [
+                            "text" =>
 "Perform PUT request with \"put\" in Mojo::UserAgent and return resulting Mojo::Message::Response object."
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["u"]
+                    "text" => "u"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => ["  my \$dom = x('<div>Hello!</div>');"]
+                            "text" => "  my \$dom = x('<div>Hello!</div>');"
                         },
                         {
                             "tag"  => "Para",
@@ -635,19 +633,19 @@ sub expected_tree {
                         },
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'"
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["x"]
+                    "text" => "x"
                 },
                 {
                     "kids" => [
                         {
                             "tag"  => "Verbatim",
-                            "text" => ["  my \$dom = x('<div>Hello!</div>');"]
+                            "text" => "  my \$dom = x('<div>Hello!</div>');"
                         },
                         {
                             "tag"  => "Para",
@@ -656,29 +654,29 @@ sub expected_tree {
                         },
                         {
                             "tag"  => "Verbatim",
-                            "text" => [
+                            "text" =>
 "  \$ perl -Mojo -E 'say x(f(\"test.html\")->slurp)->at(\"title\")->text'"
-                            ]
+
                         }
                     ],
                     "tag"  => "head2",
-                    "text" => ["x2()"]
+                    "text" => "x2()"
                 }
             ],
             "tag"  => "head1",
-            "text" => ["FUNCTIONS"]
+            "text" => "FUNCTIONS"
         },
         {
             "kids" => [
                 {
                     "tag"  => "Para",
-                    "text" => [
+                    "text" =>
 "Mojolicious, Mojolicious::Guides, https://mojolicious.org."
-                    ]
+
                 }
             ],
             "tag"  => "head1",
-            "text" => ["SEE ALSO"]
+            "text" => "SEE ALSO"
         }
     ];
 }

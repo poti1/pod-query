@@ -25,10 +25,14 @@ Version 0.13
 =cut
 
 our $VERSION               = '0.13';
+our $DEBUG_LOL_DUMP        = 0;
+our $DEBUG_STRUCT_OVER     = 0;
 our $DEBUG_TREE            = 0;
+our $DEBUG_TREE_DUMP       = 0;
+our $DEBUG_FIND_CONDITIONS = 0;
+our $DEBUG_PRE_FIND_DUMP   = 0;
 our $DEBUG_FIND            = 0;
-our $DEBUG_FIND_CONDITIONS = 1;
-our $DEBUG_FIND_DUMP       = 1;
+our $DEBUG_FIND_DUMP       = 0;
 our $DEBUG_INVERT          = 0;
 our $DEBUG_RENDER          = 0;
 our $MOCK_ROOT             = 0;
@@ -102,9 +106,17 @@ sub new {
 
     my $lol = $MOCK_ROOT ? _mock_root() : Pod::LOL->new_root( $s->path );
     $lol = _flatten_for_tags( $lol );
+    if ( $DEBUG_LOL_DUMP ) {
+        say "DEBUG_LOL_DUMP: " . dumper $lol;
+        exit;
+    }
 
     $s->lol( $lol );
     $s->tree( _lol_to_tree( $lol ) );
+    if ( $DEBUG_TREE_DUMP ) {
+        say "DEBUG_TREE_DUMP: " . dumper $s->tree();
+        exit;
+    }
 
     $CACHE{$pod_class} = $s;
 
@@ -312,15 +324,15 @@ sub _make_leaf {
     return $node if ref $node eq ref {};
 
     my ( $tag, @text ) = @$node;
-    my $leaf = {
-        tag  => $tag,
-        text => \@text,
-    };
+    my $leaf = { tag => $tag };
 
-    # TODO: Why have this since most pod are not using "over-text"?
-    if ( $tag eq "over-text" ) {
-        $leaf->{is_over} = 1;
-        $leaf->{text}    = _structure_over( \@text );
+    if ( $tag =~ / ^ over- /x ) {
+
+        # $leaf->{is_over} = 1;
+        $leaf->{kids} = _structure_over( \@text );
+    }
+    else {
+        $leaf->{text} = join "", @text;
     }
 
     $leaf;
@@ -329,26 +341,43 @@ sub _make_leaf {
 
 =head2 _structure_over
 
-Restructures the text for an "over-text" element.
-item-text will be the first element of each group.
+Restructures the text for an "over-text" element to be under it.
+Also, "item-text" will be the first element of each group.
 
 =cut
 
 sub _structure_over {
     my ( $text_list ) = @_;
     my @struct;
-    my @q;
+    my @nodes;
+
+    my $push = sub {
+        return if not @nodes;
+
+        # First is the parent node.
+        my $item_text = shift @nodes;
+
+        # Treat the rest of the tags as kids.
+        push @struct,
+          { %$item_text, @nodes ? ( kids => [ splice @nodes ] ) : (), };
+    };
 
     for ( @$text_list ) {
-        my ( $tag, $text ) = @$_;
-        if ( $tag eq "item-text" ) {
-            push @struct, [ splice @q ] if @q;
-        }
-
-        push @q, $_;
+        my ( $tag, @text ) = @$_;
+        $push->() if $tag =~ / ^ item- /x;
+        push @nodes,
+          {
+            tag  => $tag,
+            text => join( "", @text ),
+          };
     }
 
-    push @struct, [ splice @q ] if @q;
+    $push->();
+
+    if ( $DEBUG_STRUCT_OVER ) {
+        say "DEBUG_STRUCT_OVER-IN: " . dumper $text_list;
+        say "DEBUG_STRUCT_OVER-OUT: " . dumper \@struct;
+    }
 
     \@struct;
 }
@@ -469,14 +498,18 @@ sub find {
     else {
         $find_conditions = \@raw_conditions;
     }
-
-    say dumper $find_conditions if $DEBUG_FIND_CONDITIONS;
+    say "DEBUG_FIND_CONDITIONS: " - dumper $find_conditions
+      if $DEBUG_FIND_CONDITIONS;
 
     _check_conditions( $find_conditions );
     _set_condition_defaults( $find_conditions );
 
     my @tree = $s->tree->@*;
     my $kept_all;
+    if ( $DEBUG_PRE_FIND_DUMP ) {
+        say "DEBUG_PRE_FIND_DUMP: " . dumper \@tree;
+        exit;
+    }
 
     for ( @$find_conditions ) {
         @tree = _find( $_, @tree );
@@ -485,8 +518,10 @@ sub find {
             last;
         }
     }
-
-    say dumper \@tree if $DEBUG_FIND_DUMP;
+    if ( $DEBUG_FIND_DUMP ) {
+        say "DEBUG_FIND_DUMP: " . dumper \@tree;
+        exit;
+    }
 
     if ( not $kept_all ) {
         @tree = _invert( @tree );
@@ -735,57 +770,56 @@ sub _find {
         while ( my $try = shift @tries ) { # Can add to this queue if a sub tag.
             say "\nTrying: try=", dumper $try if $DEBUG_FIND;
 
-            my ( $try_text ) =
-              $try->{text}->@*;            # TODO: why only the first text?
-            say "text=$try_text"             if $DEBUG_FIND;
-            say "next->{tag}=$need->{tag}"   if $DEBUG_FIND;
-            say "next->{text}=$need->{text}" if $DEBUG_FIND;
-
-            if ( defined $try->{keep} ) {    # TODO; Why empty block?
-                say "ENFORCING: keep" if $DEBUG_FIND;
-            }
-            elsif ( $try->{tag} =~ /$need->{tag}/
-                and $try_text =~ /$need->{text}/ )
-            {
-                say "Found:  tag=$try->{tag}, text=$try_text" if $DEBUG_FIND;
-                push @found_in_group, {
-                    %$try,                   # Copy current search options.
-                    prev => \@prev,          # Need this for the inversion step.
-                    keep => $need->{keep},   # Remember for later.
-                };
-
-                # Specific match (positive)
-                say "nth_p:$nth_p and found_in_group:"
-                  . dumper \@found_in_group
-                  if $DEBUG_FIND;
-                if ( $nth_p and @found + @found_in_group > $nth_p ) {
-                    say "ENFORCING: nth=$nth_p" if $DEBUG_FIND;
-                    @found = $found_in_group[-1];
-                    last GROUP;
+            if ( $try->{text} ) {          # over-text has no text (only kids).
+                if ( $DEBUG_FIND ) {
+                    say "text=$try->{text}";
+                    say "next->{tag}=$need->{tag}";
+                    say "next->{text}=$need->{text}";
                 }
 
-                # Specific group match (positive)
-                elsif ( $nth_in_group_p and @found_in_group > $nth_in_group_p )
+                if ( defined $try->{keep} ) {    # TODO; Why empty block?
+                    say "ENFORCING: keep" if $DEBUG_FIND;
+                }
+                elsif ( $try->{tag} =~ /$need->{tag}/
+                    and $try->{text} =~ /$need->{text}/ )
                 {
-                    say "ENFORCING: nth_in_group=$nth_in_group_p"
+                    say "Found:  tag=$try->{tag}, text=$try->{text}"
                       if $DEBUG_FIND;
-                    @found_in_group = $found_in_group[-1];
-                    last TRY;
-                }
+                    push @found_in_group, {
+                        %$try,             # Copy current search options.
+                        prev => \@prev,    # Need this for the inversion step.
+                        keep => $need->{keep},    # Remember for later.
+                    };
 
-                next TRY;
+                    # Specific match (positive)
+                    say "nth_p:$nth_p and found_in_group:"
+                      . dumper \@found_in_group
+                      if $DEBUG_FIND;
+                    if ( $nth_p and @found + @found_in_group > $nth_p ) {
+                        say "ENFORCING: nth=$nth_p" if $DEBUG_FIND;
+                        @found = $found_in_group[-1];
+                        last GROUP;
+                    }
+
+                    # Specific group match (positive)
+                    elsif ( $nth_in_group_p
+                        and @found_in_group > $nth_in_group_p )
+                    {
+                        say "ENFORCING: nth_in_group=$nth_in_group_p"
+                          if $DEBUG_FIND;
+                        @found_in_group = $found_in_group[-1];
+                        last TRY;
+                    }
+
+                    next TRY;
+                }
             }
 
             if ( $try->{kids} and not @found_in_group ) {
                 say "Got kids and nothing yet in queue" if $DEBUG_FIND;
                 unshift @tries, $try->{kids}->@*;    # Process kids tags.
                 if ( $try->{keep} and not $locked_prev++ ) {
-                    unshift @prev,
-                      {
-                        tag  => $try->{tag},
-                        text => [$try_text],
-                        keep => $try->{keep},
-                      };
+                    unshift @prev, { %$try{qw/tag text keep/} };
                     say "prev changed: ", dumper \@prev if $DEBUG_FIND;
                 }
                 say "locked_prev: $locked_prev" if $DEBUG_FIND;
@@ -900,7 +934,7 @@ sub _render {
         while ( my $try = shift @tries ) {
             say "\nTrying: try=", dumper $try if $DEBUG_RENDER;
 
-            my $_text = $try->{text}[0];
+            my $_text = $try->{text};
             say "_text=$_text" if $DEBUG_RENDER;
 
             if ( $kept_all ) {
@@ -943,10 +977,13 @@ sub _render {
 
 Specifically called for rendering "over" elements.
 
+# TODO: might remove this since over-text is now handled using kids.
+
 =cut
 
 sub _render_over {
-    my ( $list, $kept_all ) = @_;
+    my ( $text, $kept_all ) = @_;
+    my $list = [$text];
     if ( $DEBUG_RENDER ) {
         say "\n_RENDER_OVER()";
         say "list=", dumper $list;

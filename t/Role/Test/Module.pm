@@ -20,7 +20,6 @@ requires qw(
 
 sub run {
     my ( $obj, %parms ) = @_;
-    my $module = "Mojo::UserAgent";
 
     use_ok( "Pod::Query" ) || print "Bail out!\n";
     diag( "Testing Pod::Query $Pod::Query::VERSION, Perl $], $^X" );
@@ -41,10 +40,13 @@ sub run {
     my $query = Pod::Query->new( $class );
 
     # path.
-    is_deeply( $query->{path}, "$class_dir/$class.pm", "path", );
+    is_deeply( $query->{path}, "$class_dir/$class.pm", "path" );
 
     # tree.
-    is_deeply( $query->{tree}, $obj->expected_tree, "tree", );
+    say dumper $query->{tree} unless
+    is_deeply( $query->{tree}, $obj->expected_tree, "tree" );
+
+    # exit;
 
     # find_title.
     is( $query->find_title(), $obj->expected_find_title, "find_title" );
@@ -65,7 +67,7 @@ sub run {
     # Methods.
     my $cases = $obj->define_cases;
     for my $case ( @$cases ) {
-        pass "=== Starting $module - method: $case->{method} ===";
+        pass "=== Starting $parms{module} - method: $case->{method} ===";
 
         # say dumper [ $query->find_method( $case->{method} ) ];
 

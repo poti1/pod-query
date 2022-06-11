@@ -41,11 +41,11 @@ my @cases = (
                 "kids" => [
                     {
                         "tag"  => "Para",
-                        "text" => ["Example - Just an example"]
+                        "text" => "Example - Just an example"
                     }
                 ],
                 "tag"  => "head1",
-                "text" => ["NAME"]
+                "text" => "NAME"
             }
         ],
         expected_find_title => "Example - Just an example"
@@ -66,11 +66,11 @@ my @cases = (
                 "kids" => [
                     {
                         "tag"  => "Para",
-                        "text" => ["Example - Just an example"]
+                        "text" => "Example - Just an example"
                     }
                 ],
                 "tag"  => "head1",
-                "text" => ["NAME"]
+                "text" => "NAME"
             }
         ],
         expected_find_title => "Example - Just an example"
@@ -82,7 +82,7 @@ my @cases = (
         expected_tree => [
             {
                 "tag"  => "head2",
-                "text" => ["Function1"]
+                "text" => "Function1"
             }
         ],
         expected_find_title => "",
@@ -96,11 +96,11 @@ my @cases = (
                 "kids" => [
                     {
                         "tag"  => "Para",
-                        "text" => ["Summary"]
+                        "text" => "Summary"
                     }
                 ],
                 "tag"  => "head2",
-                "text" => ["Function1"]
+                "text" => "Function1"
             }
         ],
         expected_find_title => "",
@@ -118,15 +118,15 @@ my @cases = (
                 "kids" => [
                     {
                         "tag"  => "Para",
-                        "text" => ["Summary"]
+                        "text" => "Summary"
                     },
                     {
                         "tag"  => "Verbatim",
-                        "text" => [" Desc"]
+                        "text" => " Desc"
                     }
                 ],
                 "tag"  => "head2",
-                "text" => ["Function1"]
+                "text" => "Function1"
             }
         ],
         expected_find_title => "",
