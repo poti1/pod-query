@@ -24,18 +24,19 @@ Version 0.13
 
 =cut
 
-our $VERSION               = '0.13';
-our $DEBUG_LOL_DUMP        = 0;
-our $DEBUG_STRUCT_OVER     = 0;
-our $DEBUG_TREE            = 0;
-our $DEBUG_TREE_DUMP       = 0;
-our $DEBUG_FIND_CONDITIONS = 0;
-our $DEBUG_PRE_FIND_DUMP   = 0;
-our $DEBUG_FIND            = 0;
-our $DEBUG_FIND_DUMP       = 0;
-our $DEBUG_INVERT          = 0;
-our $DEBUG_RENDER          = 0;
-our $MOCK_ROOT             = 0;
+our $VERSION                   = '0.13';
+our $DEBUG_LOL_DUMP            = 0;
+our $DEBUG_STRUCT_OVER         = 0;
+our $DEBUG_TREE                = 0;
+our $DEBUG_TREE_DUMP           = 0;
+our $DEBUG_FIND_CONDITIONS     = 0;
+our $DEBUG_FIND_AFTER_DEFAULTS = 0;
+our $DEBUG_PRE_FIND_DUMP       = 0;
+our $DEBUG_FIND                = 0;
+our $DEBUG_FIND_DUMP           = 0;
+our $DEBUG_INVERT              = 0;
+our $DEBUG_RENDER              = 0;
+our $MOCK_ROOT                 = 0;
 
 
 has [
@@ -156,31 +157,7 @@ Builds a sample object (overwrite this in a test file).
 
 =cut
 
-sub _mock_root {
-    [
-        [ "head1",    "HEAD1", ],
-        [ "head2",    "HEAD2_1", ],
-        [ "Verbatim", "HEAD2_1-VERBATIM_1", ],
-        [ "Para",     "HEAD2_1-PARA_1" . ( "long" x 20 ), ],
-        [ "Verbatim", "HEAD2_1-VERBATIM_2", ],
-        [ "Para",     "HEAD2_1-PARA_2", ],
-        [ "head2",    "HEAD2_2", ],
-        [ "Verbatim", "HEAD2_2-VERBATIM_1", ],
-        [ "Para",     "HEAD2_2-PARA_1", ],
-        [ "Para",     "OPTS:", ],
-        [
-            "over-text",
-            [ "item-text", "OPT-A", ],
-            [ "Verbatim",  "OPT-A => 1", ],
-            [ "Para",      "OPT-A DESC", ],
-            [ "item-text", "OPT-B", ],
-            [ "Verbatim",  "OPT-B => 1", ],
-            [ "Para",      "OPT-B DESC", ],
-        ],
-        [ "Verbatim", "HEAD2_2-VERBATIM_2", ],
-        [ "Para",     "HEAD2_2-PARA_2", ],
-    ]
-}
+sub _mock_root { }
 
 =head2 _flatten_for_tags
 
@@ -327,9 +304,8 @@ sub _make_leaf {
     my $leaf = { tag => $tag };
 
     if ( $tag =~ / ^ over- /x ) {
-
-        # $leaf->{is_over} = 1;
         $leaf->{kids} = _structure_over( \@text );
+        $leaf->{text} = "";
     }
     else {
         $leaf->{text} = join "", @text;
@@ -498,11 +474,13 @@ sub find {
     else {
         $find_conditions = \@raw_conditions;
     }
-    say "DEBUG_FIND_CONDITIONS: " - dumper $find_conditions
+    say "DEBUG_FIND_CONDITIONS: " . dumper $find_conditions
       if $DEBUG_FIND_CONDITIONS;
 
     _check_conditions( $find_conditions );
     _set_condition_defaults( $find_conditions );
+    say "DEBUG_FIND_AFTER_DEFAULTS " . dumper $find_conditions
+      if $DEBUG_FIND_AFTER_DEFAULTS;
 
     my @tree = $s->tree->@*;
     my $kept_all;
@@ -605,9 +583,6 @@ sub _query_string_to_struct {
             }
         }
 
-        # say "_: $_";
-        # say "cond: " . dumper \@condition;
-
         # Regex or literal.
         for ( qw/ tag text / ) {
             last if not @condition;
@@ -616,7 +591,9 @@ sub _query_string_to_struct {
         }
 
         $set;
-      } parse_line( '/', 1, $query_string );
+      }
+      grep { $_ }    # Skip trailing and leading slashes.
+      parse_line( '/', 1, $query_string );
 
     \@query_struct;
 }
@@ -695,7 +672,7 @@ sub _set_condition_defaults {
                 }
             }
             else {
-                $condition->{$_} = qr/./;
+                $condition->{$_} = qr//;
             }
         }
 
@@ -737,8 +714,6 @@ sub _set_condition_defaults {
 
 Lower level find command.
 
-TODO: Need to clean this up and possibly restructure.
-
 =cut
 
 sub _find {
@@ -770,7 +745,7 @@ sub _find {
         while ( my $try = shift @tries ) { # Can add to this queue if a sub tag.
             say "\nTrying: try=", dumper $try if $DEBUG_FIND;
 
-            if ( $try->{text} ) {          # over-text has no text (only kids).
+            if ( defined $try->{text} ) {   # over-text has no text (only kids).
                 if ( $DEBUG_FIND ) {
                     say "text=$try->{text}";
                     say "next->{tag}=$need->{tag}";
@@ -868,7 +843,7 @@ sub _invert {
     my %navi;
 
     for my $group ( @groups ) {
-        push @tree, { %$group{qw/ tag text keep kids is_over /} };
+        push @tree, { %$group{qw/ tag text keep kids /} };
         if ( $DEBUG_INVERT ) {
             say "\nInverting: group=", dumper $group;
             say "tree: ",              dumper \@tree;
@@ -947,10 +922,6 @@ sub _render {
             }
             elsif ( $try->{keep} ) {
                 say "keeping" if $DEBUG_RENDER;
-                if ( $try->{is_over} ) {
-                    $_text = _render_over( $try->{text}, $kept_all );
-                }
-                say "_text2=$_text" if $DEBUG_RENDER;
                 push @lines, $_text;
             }
 
@@ -961,9 +932,7 @@ sub _render {
                     say "tries:  ", dumper \@tries;
                 }
             }
-
         }
-
     }
 
     say "lines: ", dumper \@lines if $DEBUG_RENDER;
@@ -971,67 +940,6 @@ sub _render {
     return @lines if wantarray;
     join "\n", @lines;
 }
-
-
-=head2 _render_over
-
-Specifically called for rendering "over" elements.
-
-# TODO: might remove this since over-text is now handled using kids.
-
-=cut
-
-sub _render_over {
-    my ( $text, $kept_all ) = @_;
-    my $list = [$text];
-    if ( $DEBUG_RENDER ) {
-        say "\n_RENDER_OVER()";
-        say "list=", dumper $list;
-    }
-
-    my @txt;
-
-    # Formatters
-    state $f_norm;
-    state $f_sub;
-    if ( not $f_norm ) {
-        $f_norm           = Pod::Text->new( width => get_term_width(), );
-        $f_norm->{MARGIN} = 2;
-        $f_sub            = Pod::Text->new( width => get_term_width(), );
-        $f_sub->{MARGIN}  = 4;
-    }
-
-    for my $items ( @$list ) {
-        my $n;
-        for ( @$items ) {
-            say "over-item=", dumper $_ if $DEBUG_RENDER;
-
-            my ( $tag, $text ) = @$_;
-
-            if ( $kept_all ) {
-                say "USING FORMATTER" if $DEBUG_RENDER;
-                $text .= ":"          if ++$n == 1;
-                if ( $tag eq "item-text" ) {
-                    $text = $f_norm->reformat( $text );
-                }
-                else {
-                    $text = b( $text )->trim;
-                    $text = $f_sub->reformat( $text );
-                }
-            }
-
-            push @txt, $text;
-            push @txt, "" if $kept_all;
-        }
-    }
-
-    my $new_text = join "\n", @txt;
-
-    say "Changed over-text to: $new_text" if $DEBUG_RENDER;
-
-    $new_text;
-}
-
 
 =head2 get_term_width
 

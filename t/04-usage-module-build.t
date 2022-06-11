@@ -975,7 +975,8 @@ sub expected_tree {
                             "text" => "Cookbook (Module::Build::Cookbook)"
                         }
                     ],
-                    "tag" => "over-text"
+                    "text" => "",
+                    "tag"  => "over-text",
                 }
             ],
             "tag"  => "head1",
@@ -1817,7 +1818,8 @@ sub expected_tree {
                             "text" => "versioninstall"
                         }
                     ],
-                    "tag" => "over-text"
+                    "text" => "",
+                    "tag"  => "over-text"
                 }
             ],
             "tag"  => "head1",
@@ -1906,7 +1908,8 @@ sub expected_tree {
                                     "text" => "debug"
                                 }
                             ],
-                            "tag" => "over-text"
+                            "text" => "",
+                            "tag"  => "over-text"
                         }
                     ],
                     "tag"  => "head2",
@@ -1982,7 +1985,8 @@ sub expected_tree {
                                     "text" => "PERL_MB_OPT"
                                 }
                             ],
-                            "tag" => "over-text"
+                            "text" => "",
+                            "tag"  => "over-text"
                         }
                     ],
                     "tag"  => "head2",
@@ -2099,7 +2103,8 @@ sub expected_tree {
                             "text" => "libhtml"
                         }
                     ],
-                    "tag" => "over-text"
+                    "text" => "",
+                    "tag"  => "over-text"
                 },
                 {
                     "tag"  => "Para",
@@ -2275,7 +2280,8 @@ sub expected_tree {
                             "text" => "prefix"
                         }
                     ],
-                    "tag" => "over-text"
+                    "text" => "",
+                    "tag"  => "over-text"
                 }
             ],
             "tag"  => "head1",
@@ -2311,7 +2317,8 @@ sub expected_tree {
 "Module::Build provides more features and a better experience for distribution authors than ExtUtils::MakeMaker. However, tools designed specifically for authoring, such as Dist::Zilla and its spinoffs Dist::Milla and Minilla, provide these features and more, and generate a configure script (Makefile.PL/Build.PL) that will use any of the various installers separately on the end user side. App::ModuleBuildTiny is an alternative standalone authoring tool for distributions using Module::Build::Tiny, which requires only a simple two-line Build.PL."
                         }
                     ],
-                    "tag" => "over-bullet"
+                    "text" => "",
+                    "tag"  => "over-bullet"
                 }
             ],
             "tag"  => "head1",
@@ -2452,6 +2459,45 @@ sub define_find_cases {
             ],
         },
 
+        # Same (over-text is optional since it just has kids)
+        {
+            name            => "build options",
+            find            => "head1=ACTIONS[0]/over-text/item-text",
+            expected_struct => [
+                {
+                    tag  => "head1",
+                    text => "ACTIONS",
+                    nth  => 0,
+                },
+                {
+                    tag => "over-text",
+                },
+                {
+                    tag => "item-text",
+                },
+            ],
+            expected_find => [
+                "build",           "clean",
+                "code",            "config_data",
+                "diff",            "dist",
+                "distcheck",       "distclean",
+                "distdir",         "distinstall",
+                "distmeta",        "distsign",
+                "disttest",        "docs",
+                "fakeinstall",     "help",
+                "html",            "install",
+                "installdeps",     "manifest",
+                "manifest_skip",   "manpages",
+                "pardist",         "ppd",
+                "ppmdist",         "prereq_data",
+                "prereq_report",   "pure_install",
+                "realclean",       "retest",
+                "skipcheck",       "test",
+                "testall",         "testcover",
+                "testdb",          "testpod",
+                "testpodcoverage", "versioninstall",
+            ],
+        },
     ]
 }
 
@@ -2461,5 +2507,5 @@ use FindBin();
 use lib $FindBin::RealBin;
 
 Test::Mojo::UserAgent->with_roles( 'Role::Test::Module' )
-  ->run( module => "Module::Build", tests => 10 );
+  ->run( module => "Module::Build", tests => 13 );
 

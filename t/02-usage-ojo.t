@@ -1193,7 +1193,7 @@ sub define_find_cases {
             ],
         },
 
-        # TODO: 2
+        # TODO: 2 ???
 
         {
             name =>
@@ -1223,16 +1223,38 @@ sub define_find_cases {
                 },
                 {
                     tag => "Para",
-
-                    # text => "ojo - Fun one-liners with Mojo",
                     nth => 0,
                 },
             ],
             expected_find => [ "ojo - Fun one-liners with Mojo", ],
         },
+
+        # Bug fixes.
         {
-            name            => "find tag=Para, text=Any,First,Literal,First",
-            find            => '~.[0]/Para[0]',
+            name            => "Trailing slash should not be an error",
+            find            => 'head1/',
+            expected_struct => [
+                {
+                    tag => "head1",
+                },
+            ],
+            expected_find =>
+              [ "NAME", "SYNOPSIS", "DESCRIPTION", "FUNCTIONS", "SEE ALSO" ],
+        },
+        {
+            name            => "Leading slash should not be an error",
+            find            => '/head1',
+            expected_struct => [
+                {
+                    tag => "head1",
+                },
+            ],
+            expected_find =>
+              [ "NAME", "SYNOPSIS", "DESCRIPTION", "FUNCTIONS", "SEE ALSO" ],
+        },
+        {
+            name => "Trailing slash should not be an error (anywhere)",
+            find => '~.[0]/Para[0]/',
             expected_struct => [
                 {
                     tag => qr/./,
@@ -1246,13 +1268,6 @@ sub define_find_cases {
             expected_find => ["ojo - Fun one-liners with Mojo"],
         },
 
-        # tag       => "TAG",
-        # text      => "TEXT",
-        # keep      => 1,      # Must only be in last section.
-        # keep_all  => 1,
-        # nth       => 0,      # These options ...
-        # nth_in_group => 0,      #   are exclusive.
-
     ]
 }
 
@@ -1263,5 +1278,5 @@ use FindBin();
 use lib $FindBin::RealBin;
 
 Test::ojo->with_roles( 'Role::Test::Module' )
-  ->run( module => "ojo", tests => 95 );
+  ->run( module => "ojo", tests => 101 );
 
