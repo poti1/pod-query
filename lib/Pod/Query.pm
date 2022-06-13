@@ -379,10 +379,7 @@ Extracts the complete method information.
 
 sub find_method {
     my ( $s, $method ) = @_;
-    return "" if $method !~ / ^ \w /x;
-
-    my $m = $s->_clean_method_name( $method );
-    return "" if $m !~ / ^ \w /x;
+    my $m = $s->_clean_method_name( $method ) or return "";
 
     $s->find( sprintf '~head=~^%s\b.*$[0]**', $m );
 }
@@ -396,14 +393,10 @@ Extracts the method summary.
 
 sub find_method_summary {
     my ( $s, $method ) = @_;
-    return "" if $method !~ / ^ \w /x;
-
-    my $m = $s->_clean_method_name( $method );
-    return "" if $m !~ / ^ \w /x;
+    my $m = $s->_clean_method_name( $method ) or return "";
 
     scalar $s->find( sprintf '~head=~^%s\b.*$[0]/~(Data|Para)[0]', $m );
 }
-
 
 =head2 _clean_method_name
 
@@ -413,7 +406,13 @@ Returns a method name without any possible parenthesis.
 
 sub _clean_method_name {
     my ( $s, $name ) = @_;
-    quotemeta( $name =~ s/[^a-zA-Z0-9_]+//gr );
+    my $safe_start = qr/ ^ [\w_] /x;
+    return if $name !~ $safe_start;
+
+    my $clean = quotemeta( $name =~ s/[^a-zA-Z0-9_]+//gr );
+    return if $clean !~ $safe_start;
+
+    $clean;
 }
 
 
