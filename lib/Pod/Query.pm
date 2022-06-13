@@ -379,9 +379,10 @@ Extracts the complete method information.
 
 sub find_method {
     my ( $s, $method ) = @_;
+    return "" if $method !~ / ^ \w /x;
+
     my $m = $s->_clean_method_name( $method );
-    return "" if $m ne $method;
-    return "" if $m !~ /\w/;
+    return "" if $m !~ / ^ \w /x;
 
     $s->find( sprintf '~head=~^%s\b.*$[0]**', $m );
 }
@@ -395,9 +396,10 @@ Extracts the method summary.
 
 sub find_method_summary {
     my ( $s, $method ) = @_;
+    return "" if $method !~ / ^ \w /x;
+
     my $m = $s->_clean_method_name( $method );
-    return "" if $m ne $method;
-    return "" if $m !~ /\w/;
+    return "" if $m !~ / ^ \w /x;
 
     scalar $s->find( sprintf '~head=~^%s\b.*$[0]/~(Data|Para)[0]', $m );
 }
