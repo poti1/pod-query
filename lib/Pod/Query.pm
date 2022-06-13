@@ -407,7 +407,9 @@ Returns a method name without any possible parenthesis.
 sub _clean_method_name {
     my ( $s, $name ) = @_;
     my $safe_start = qr/ ^ [\w_] /x;
+    my $safe_end   = qr/ [\w_()] $ /x;
     return if $name !~ $safe_start;
+    return if $name !~ $safe_end;
 
     my $clean = quotemeta( $name =~ s/[^a-zA-Z0-9_]+//gr );
     return if $clean !~ $safe_start;
