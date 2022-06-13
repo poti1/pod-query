@@ -20,11 +20,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.13
+Version 0.14
 
 =cut
 
-our $VERSION                   = '0.13';
+our $VERSION                   = '0.14';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -38,10 +38,10 @@ our $DEBUG_INVERT              = 0;
 our $DEBUG_RENDER              = 0;
 our $MOCK_ROOT                 = 0;
 
-
 has [
     qw/
-      path lol
+      path
+      lol
       tree
       title
       events
@@ -379,8 +379,11 @@ Extracts the complete method information.
 
 sub find_method {
     my ( $s, $method ) = @_;
-    $s->find( sprintf '~head=~^%s\b.*$[0]**',
-        $s->_clean_method_name( $method ) );
+    my $m = $s->_clean_method_name( $method );
+    return "" if $m ne $method;
+    return "" if $m !~ /\w/;
+
+    $s->find( sprintf '~head=~^%s\b.*$[0]**', $m );
 }
 
 
@@ -392,8 +395,11 @@ Extracts the method summary.
 
 sub find_method_summary {
     my ( $s, $method ) = @_;
-    scalar $s->find( sprintf '~head=~^%s\b.*$[0]/~(Data|Para)[0]',
-        $s->_clean_method_name( $method ) );
+    my $m = $s->_clean_method_name( $method );
+    return "" if $m ne $method;
+    return "" if $m !~ /\w/;
+
+    scalar $s->find( sprintf '~head=~^%s\b.*$[0]/~(Data|Para)[0]', $m );
 }
 
 
@@ -405,7 +411,7 @@ Returns a method name without any possible parenthesis.
 
 sub _clean_method_name {
     my ( $s, $name ) = @_;
-    $name =~ s/[^a-zA-Z0-9_]+//gr;
+    quotemeta( $name =~ s/[^a-zA-Z0-9_]+//gr );
 }
 
 
@@ -498,7 +504,7 @@ sub find {
     }
     if ( $DEBUG_FIND_DUMP ) {
         say "DEBUG_FIND_DUMP: " . dumper \@tree;
-        exit;
+        exit if $DEBUG_FIND_DUMP > 1;
     }
 
     if ( not $kept_all ) {
