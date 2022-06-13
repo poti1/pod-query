@@ -37,7 +37,7 @@ my @cases = (
         query_string          => q(~^head\d$=method\b[0]**),
         expected_query_struct => [
             {
-                tag      => qr/^head\d$/,
+                tag      => qr/^head\d$/i,
                 text     => 'method\b',
                 nth      => 0,
                 keep_all => 1,
@@ -49,12 +49,12 @@ my @cases = (
         query_string          => q(~^head\d$=method\b[0]/~(Data|Para)[0]),
         expected_query_struct => [
             {
-                tag  => qr/^head\d$/,
+                tag  => qr/^head\d$/i,
                 text => 'method\b',
                 nth  => 0,
             },
             {
-                tag => qr/(Data|Para)/,
+                tag => qr/(Data|Para)/i,
                 nth => 0,
             },
         ],
@@ -64,12 +64,12 @@ my @cases = (
         query_string          => q(~^head\d$=EVENTS[0]/~^head\d$*/(Para)[0]),
         expected_query_struct => [
             {
-                tag  => qr/^head\d$/,
+                tag  => qr/^head\d$/i,
                 text => "EVENTS",
                 nth  => 0,
             },
             {
-                tag  => qr/^head\d$/,
+                tag  => qr/^head\d$/i,
                 keep => 1,
             },
             {
@@ -100,8 +100,8 @@ my @cases = (
         query_string          => q(~head=~^method\b.*$[0]**),
         expected_query_struct => [
             {
-                tag      => qr/head/,
-                text     => qr/^method\b.*$/,
+                tag      => qr/head/i,
+                text     => qr/^method\b.*$/i,
                 nth      => 0,
                 keep_all => 1,
             },
@@ -112,8 +112,8 @@ my @cases = (
         query_string          => q(~head=~^method\\(\\)\b.*$[0]**),
         expected_query_struct => [
             {
-                tag      => qr/head/,
-                text     => qr/^method\(\)\b.*$/,
+                tag      => qr/head/i,
+                text     => qr/^method\(\)\b.*$/i,
                 nth      => 0,
                 keep_all => 1,
             },
@@ -124,12 +124,12 @@ my @cases = (
         query_string          => q(~head=~method\b[0]/~(Data|Para)[0]),
         expected_query_struct => [
             {
-                tag  => qr/head/,
-                text => qr/method\b/,
+                tag  => qr/head/i,
+                text => qr/method\b/i,
                 nth  => 0,
             },
             {
-                tag => qr/(Data|Para)/,
+                tag => qr/(Data|Para)/i,
                 nth => 0,
             },
         ],
@@ -139,12 +139,12 @@ my @cases = (
         query_string          => q(~head=EVENTS[0]/~head*/(Para)[0]),
         expected_query_struct => [
             {
-                tag  => qr/head/,
+                tag  => qr/head/i,
                 text => "EVENTS",
                 nth  => 0,
             },
             {
-                tag  => qr/head/,
+                tag  => qr/head/i,
                 keep => 1,
             },
             {
@@ -207,8 +207,8 @@ my @cases = (
         query_string          => q(~head=~method\b[0]*),
         expected_query_struct => [
             {
-                tag  => qr/head/,
-                text => qr/method\b/,
+                tag  => qr/head/i,
+                text => qr/method\b/i,
                 nth  => 0,
                 keep => 1,
             },
@@ -219,8 +219,8 @@ my @cases = (
         query_string          => q(~head*=~method\b[0]*),
         expected_query_struct => [
             {
-                tag  => qr/head*/,
-                text => qr/method\b/,
+                tag  => qr/head*/i,
+                text => qr/method\b/i,
                 nth  => 0,
                 keep => 1,
             },
@@ -234,12 +234,12 @@ my @cases = (
         query_string          => q(~head=~method\b[0]/~(Data|Para)[0]),
         expected_query_struct => [
             {
-                tag  => qr/head/,
-                text => qr/method\b/,
+                tag  => qr/head/i,
+                text => qr/method\b/i,
                 nth  => 0,
             },
             {
-                tag => qr/(Data|Para)/,
+                tag => qr/(Data|Para)/i,
                 nth => 0,
             },
         ],
@@ -249,12 +249,12 @@ my @cases = (
         query_string          => q(~head=~method\b[0]/(~Data|Para)[0]),
         expected_query_struct => [
             {
-                tag  => qr/head/,
-                text => qr/method\b/,
+                tag  => qr/head/i,
+                text => qr/method\b/i,
                 nth  => 0,
             },
             {
-                tag          => qr/Data|Para/,
+                tag          => qr/Data|Para/i,
                 nth_in_group => 0,
             },
         ],
@@ -324,7 +324,7 @@ my @cases = (
         query_string          => q(~'head1'),
         expected_query_struct => [
             {
-                tag => qr/'head1'/,
+                tag => qr/'head1'/i,
             },
         ],
     },
@@ -333,7 +333,7 @@ my @cases = (
         query_string          => q('~head1'),
         expected_query_struct => [
             {
-                tag => qr/head1/,
+                tag => qr/head1/i,
             },
         ],
     },
@@ -342,12 +342,12 @@ my @cases = (
         query_string          => q(~head=~'meth/od'\b[0]/(~'Da=ta'|Para)[0]),
         expected_query_struct => [
             {
-                tag  => qr/head/,
-                text => qr{'meth/od'\b},
+                tag  => qr/head/i,
+                text => qr{'meth/od'\b}i,
                 nth  => 0,
             },
             {
-                tag          => qr/'Da=ta'|Para/,
+                tag          => qr/'Da=ta'|Para/i,
                 nth_in_group => 0,
             },
         ],
@@ -357,12 +357,12 @@ my @cases = (
         query_string          => q(~head='~meth/od\b'[0]/('~Da=ta|Para')[0]),
         expected_query_struct => [
             {
-                tag  => qr/head/,
-                text => qr{meth/od\b},
+                tag  => qr/head/i,
+                text => qr{meth/od\b}i,
                 nth  => 0,
             },
             {
-                tag          => qr/Da=ta|Para/,
+                tag          => qr/Da=ta|Para/i,
                 nth_in_group => 0,
             },
         ],

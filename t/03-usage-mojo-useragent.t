@@ -1467,7 +1467,7 @@ sub define_find_cases {
             find            => '~^head\d$=get[0]**',
             expected_struct => [
                 {
-                    tag      => qr/^head\d$/,
+                    tag      => qr/^head\d$/i,
                     text     => "get",
                     nth      => 0,
                     keep_all => 1,
@@ -1489,12 +1489,12 @@ sub define_find_cases {
             find            => '~^head\d$=get[0]/~(?:Data|Para)[0]',
             expected_struct => [
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     text => "get",
                     nth  => 0,
                 },
                 {
-                    tag => qr/(?:Data|Para)/,
+                    tag => qr/(?:Data|Para)/i,
                     nth => 0,
                 },
             ],
@@ -1507,12 +1507,12 @@ sub define_find_cases {
             find            => '~^head\d$=EVENTS[0]/~^head\d$*',
             expected_struct => [
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     text => "EVENTS",
                     nth  => 0,
                 },
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     keep => 1,
                 },
             ],
@@ -1523,12 +1523,12 @@ sub define_find_cases {
             find            => '~^head\d$=EVENTS[0]/~^head\d$*/(Para)[0]',
             expected_struct => [
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     text => "EVENTS",
                     nth  => 0,
                 },
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     keep => 1,
                 },
                 {
@@ -1989,7 +1989,7 @@ sub define_find_cases {
 '~./Para="Mojo::UserAgent - Non-blocking I/O HTTP and WebSocket user agent"',
             expected_struct => [
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                 },
                 {
                     tag  => "Para",
@@ -2011,11 +2011,11 @@ sub define_find_cases {
             find            => '~.[0]/~.[0]',
             expected_struct => [
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 0,
                 },
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 0,
                 },
             ],
@@ -2028,11 +2028,11 @@ sub define_find_cases {
             find            => '~.[1]/~.[0]',
             expected_struct => [
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 1,
                 },
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 0,
                 },
             ],
@@ -2049,11 +2049,11 @@ sub define_find_cases {
             find            => '(~.)[1]/~.[0]',
             expected_struct => [
                 {
-                    tag          => qr/./,
+                    tag          => qr/./i,
                     nth_in_group => 1,
                 },
                 {
-                    tag          => qr/./,
+                    tag          => qr/./i,
                     nth_in_group => 0,
                 },
             ],
@@ -2071,12 +2071,12 @@ sub define_find_cases {
             find            => '~^head\d$=ATTRIBUTES[0]/~^head\d$',
             expected_struct => [
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     text => "ATTRIBUTES",
                     nth  => 0,
                 },
                 {
-                    tag => qr/^head\d$/,
+                    tag => qr/^head\d$/i,
                 },
             ],
             expected_find => [
@@ -2095,12 +2095,12 @@ sub define_find_cases {
             find            => '~head=ATTRIBUTES[0]/~head',
             expected_struct => [
                 {
-                    tag  => qr/head/,
+                    tag  => qr/head/i,
                     text => "ATTRIBUTES",
                     nth  => 0,
                 },
                 {
-                    tag => qr/head/,
+                    tag => qr/head/i,
                 },
             ],
             expected_find => [
@@ -2119,12 +2119,12 @@ sub define_find_cases {
             find            => '~^head\d$=ATTRIBUTES[0]/~^head\d$*/(Para)[0]',
             expected_struct => [
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     text => "ATTRIBUTES",
                     nth  => 0,
                 },
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     keep => 1,
                 },
                 {
@@ -2176,7 +2176,7 @@ sub define_find_cases {
             find            => '~.[0]/Para[0]',
             expected_struct => [
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 0,
                 },
                 {

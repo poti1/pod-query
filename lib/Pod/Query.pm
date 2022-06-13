@@ -538,8 +538,9 @@ Convert a pod query string into a structure based on these rules:
    5. Split each list of conditions by "=".
       First word is the tag.
       Second word is the text (if any).
-      If either starts with a tilde, then the word
-         is treated like a pattern.
+      If either starts with a tilde, then the word:
+         - is treated like a pattern.
+         - is case Insensitive.
 
    Precedence:
       If quoted and ~, left wins:
@@ -594,7 +595,7 @@ sub _query_string_to_struct {
         for ( qw/ tag text / ) {
             last if not @condition;
             my $cond = shift @condition;
-            $set->{$_} = ( $cond =~ s/^~// ) ? qr/$cond/ : $cond;
+            $set->{$_} = ( $cond =~ s/^~// ) ? qr/$cond/i : $cond;
         }
 
         $set;

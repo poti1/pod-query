@@ -736,7 +736,7 @@ sub define_find_cases {
             find            => '~^head\d$=(x)[0]**',
             expected_struct => [
                 {
-                    tag          => qr/^head\d$/,
+                    tag          => qr/^head\d$/i,
                     text         => "x",
                     nth_in_group => 0,
                     keep_all     => 1,
@@ -758,12 +758,12 @@ sub define_find_cases {
             find            => '~^head\d$=(x)[0]/~(?:Data|Para)[0]',
             expected_struct => [
                 {
-                    tag          => qr/^head\d$/,
+                    tag          => qr/^head\d$/i,
                     text         => "x",
                     nth_in_group => 0,
                 },
                 {
-                    tag => qr/(?:Data|Para)/,
+                    tag => qr/(?:Data|Para)/i,
                     nth => 0,
                 },
             ],
@@ -774,12 +774,12 @@ sub define_find_cases {
             find            => '~^head\d$=EVENTS[0]/~^head\d$*',
             expected_struct => [
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     text => "EVENTS",
                     nth  => 0,
                 },
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     keep => 1,
                 },
             ],
@@ -792,12 +792,12 @@ sub define_find_cases {
             find            => '~^head\d$=EVENTS[0]/~^head\d$*/(Para)[0]',
             expected_struct => [
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     text => "EVENTS",
                     nth  => 0,
                 },
                 {
-                    tag  => qr/^head\d$/,
+                    tag  => qr/^head\d$/i,
                     keep => 1,
                 },
                 {
@@ -1080,7 +1080,7 @@ sub define_find_cases {
             find            => '~./Para=ojo - Fun one-liners with Mojo',
             expected_struct => [
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                 },
                 {
                     tag  => "Para",
@@ -1139,6 +1139,22 @@ sub define_find_cases {
             ],
             expected_find => ["ojo - Fun one-liners with Mojo"],
         },
+        {
+            name            => "find_title - alt 4 - same insensitive",
+            find            => 'head1=~name[0]/Para[0]',
+            expected_struct => [
+                {
+                    tag  => "head1",
+                    text => qr/name/i,
+                    nth  => 0,
+                },
+                {
+                    tag => "Para",
+                    nth => 0,
+                },
+            ],
+            expected_find => [ "ojo - Fun one-liners with Mojo", ],
+        },
 
         # Nth.
         {
@@ -1146,11 +1162,11 @@ sub define_find_cases {
             find            => '~.[0]/~.[0]',
             expected_struct => [
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 0,
                 },
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 0,
                 },
             ],
@@ -1161,11 +1177,11 @@ sub define_find_cases {
             find            => '~.[1]/~.[0]',
             expected_struct => [
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 1,
                 },
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 0,
                 },
             ],
@@ -1180,11 +1196,11 @@ sub define_find_cases {
             find            => '~.[1]/~.[0]',
             expected_struct => [
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 1,
                 },
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 0,
                 },
             ],
@@ -1192,20 +1208,17 @@ sub define_find_cases {
 "  \$ perl -Mojo -E 'say g(\"mojolicious.org\")->dom->at(\"title\")->text'"
             ],
         },
-
-        # TODO: 2 ???
-
         {
             name =>
 "find nth_in_group=Second (no effect since not reach index), nth=First",
             find            => '(~.)[1]/~.[0]',
             expected_struct => [
                 {
-                    tag          => qr/./,
+                    tag          => qr/./i,
                     nth_in_group => 1,
                 },
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 0,
                 },
             ],
@@ -1218,7 +1231,7 @@ sub define_find_cases {
             find            => '~.[0]/Para[0]',
             expected_struct => [
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 0,
                 },
                 {
@@ -1257,7 +1270,7 @@ sub define_find_cases {
             find => '~.[0]/Para[0]/',
             expected_struct => [
                 {
-                    tag => qr/./,
+                    tag => qr/./i,
                     nth => 0,
                 },
                 {
@@ -1278,5 +1291,5 @@ use FindBin();
 use lib $FindBin::RealBin;
 
 Test::ojo->with_roles( 'Role::Test::Module' )
-  ->run( module => "ojo", tests => 101 );
+  ->run( module => "ojo", tests => 104 );
 
