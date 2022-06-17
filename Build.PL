@@ -19,7 +19,7 @@ my $builder = Module::Build->new(
         'Test::More' => '0',
     },
     requires => {
-        'Pod::LOL'      => '0.06',
+        'Pod::LOL'      => '0.07',
         'Mojolicious'   => '9.19',
         'Term::ReadKey' => '2.38',
         'Role::Tiny'    => '2.000001',

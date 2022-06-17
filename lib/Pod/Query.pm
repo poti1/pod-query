@@ -4,6 +4,7 @@ use v5.24;    # Postfix defef :)
 use strict;
 use warnings;
 use FindBin qw/ $RealBin /;
+use File::Spec::Functions qw/ catfile /;
 use List::Util qw/ first /;
 use Text::ParseWords qw/ parse_line /;
 use Mojo::Base qw/ -base /;
@@ -19,11 +20,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.15
+Version 0.16
 
 =cut
 
-our $VERSION                   = '0.15';
+our $VERSION                   = '0.16';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -134,16 +135,21 @@ Return value is cached (based on the class of the pod file).
 sub _class_to_path {
     my ( $pod_class ) = @_;
     state %CACHE;
-    my $p;
+    my $path;
 
-    return $p if $p = $CACHE{$pod_class};
+    return $path if $path = $CACHE{$pod_class};
 
-    $p = $INC{ class_to_path( $pod_class ) };
-    return $CACHE{$pod_class} = $p if $p;
+    my $partial_path = class_to_path( $pod_class );
 
-    $p = qx(perldoc -l $pod_class);
-    chomp $p;
-    return $CACHE{$pod_class} = $p if $p;
+    # Shortcut for files already used.
+    $path = $INC{$partial_path};
+    return $CACHE{$pod_class} = $path if $path and -f $path;
+
+    # Otherwise find it ourselves.
+    for ( @INC ) {
+        $path = catfile( $_, $partial_path );
+        return $CACHE{$pod_class} = $path if $path and -f $path;
+    }
 
     die "Missing: pod_class=$pod_class\n";
 }
