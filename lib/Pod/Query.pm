@@ -20,11 +20,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.17
+Version 0.18
 
 =cut
 
-our $VERSION                   = '0.17';
+our $VERSION                   = '0.18';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -43,8 +43,6 @@ has [
       path
       lol
       tree
-      title
-      events
       /
 ];
 
@@ -101,6 +99,8 @@ sub new {
     my $s = bless {
         pod_class => $pod_class,
         path      => _class_to_path( $pod_class ),
+        lol       => [],
+        tree      => [],
     }, $class;
 
     return $s if $path_only or not $s->path;
@@ -130,6 +130,8 @@ sub new {
 Given a class name, returns the path to the pod file.
 Return value is cached (based on the class of the pod file).
 
+Returns an empty string if there are any errors.
+
 =cut
 
 sub _class_to_path {
@@ -151,7 +153,7 @@ sub _class_to_path {
         return $CACHE{$pod_class} = $path if $path and -f $path;
     }
 
-    return;
+    return "";
 }
 
 
