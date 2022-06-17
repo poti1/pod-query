@@ -20,11 +20,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.16
+Version 0.17
 
 =cut
 
-our $VERSION                   = '0.16';
+our $VERSION                   = '0.17';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -103,7 +103,7 @@ sub new {
         path      => _class_to_path( $pod_class ),
     }, $class;
 
-    return $s if $path_only;
+    return $s if $path_only or not $s->path;
 
     my $lol = $MOCK_ROOT ? _mock_root() : Pod::LOL->new_root( $s->path );
     $lol = _flatten_for_tags( $lol );
@@ -151,7 +151,7 @@ sub _class_to_path {
         return $CACHE{$pod_class} = $path if $path and -f $path;
     }
 
-    die "Missing: pod_class=$pod_class\n";
+    return;
 }
 
 
