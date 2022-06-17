@@ -17,12 +17,12 @@ my @cases = (
         expect    => qr{ \b ojo\.pm $ }x,
     },
     {
-        pod_class => "Mojo::UserAgent",
-        expect    => qr{ \b Mojo/UserAgent\.pm $ }x,
-    },
-    {
         pod_class => "ojo2",
         expect    => qr{ ^ $ }x,    # Empty.
+    },
+    {
+        pod_class => "Mojo::UserAgent",
+        expect    => qr{ \b Mojo/UserAgent\.pm $ }x,
     },
 );
 
