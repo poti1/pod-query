@@ -4,7 +4,6 @@ use v5.24;    # Postfix defef :)
 use strict;
 use warnings;
 use FindBin qw/ $RealBin /;
-use Carp qw/ croak /;
 use List::Util qw/ first /;
 use Text::ParseWords qw/ parse_line /;
 use Mojo::Base qw/ -base /;
@@ -127,7 +126,7 @@ sub new {
 
 =head2 _class_to_path
 
-Given a class name, retuns the path to the pod file.
+Given a class name, returns the path to the pod file.
 Return value is cached (based on the class of the pod file).
 
 =cut
@@ -146,7 +145,7 @@ sub _class_to_path {
     chomp $p;
     return $CACHE{$pod_class} = $p if $p;
 
-    croak "Missing: pod_class=$pod_class";
+    die "Missing: pod_class=$pod_class\n";
 }
 
 
