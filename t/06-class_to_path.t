@@ -22,7 +22,13 @@ my @cases = (
     },
     {
         pod_class => "Mojo::UserAgent",
-        expect    => qr{ \b Mojo/UserAgent\.pm $ }x,
+        expect    => qr{ \b
+            @{[ quotemeta catfile(
+                    "Mojo",
+                    "UserAgent.pm"
+                )
+            ]}
+            $ }x,
     },
 );
 
