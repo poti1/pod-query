@@ -3,14 +3,13 @@ package Pod::Query;
 use v5.24;    # Postfix defef :)
 use strict;
 use warnings;
-use FindBin qw/ $RealBin /;
 use File::Spec::Functions qw/ catfile /;
-use List::Util qw/ first /;
-use Text::ParseWords qw/ parse_line /;
-use Mojo::Base qw/ -base /;
-use Mojo::Util qw/ dumper class_to_path /;
-use Mojo::ByteStream qw/ b/;
-use Term::ReadKey qw/ GetTerminalSize /;
+use List::Util            qw/ first /;
+use Text::ParseWords      qw/ parse_line /;
+use Mojo::Base            qw/ -base /;
+use Mojo::Util            qw/ dumper class_to_path /;
+use Mojo::ByteStream      qw/ b/;
+use Term::ReadKey         qw/ GetTerminalSize /;
 use Pod::Text();
 use Pod::LOL;
 
@@ -20,11 +19,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.18
+Version 0.19
 
 =cut
 
-our $VERSION                   = '0.18';
+our $VERSION                   = '0.19';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
