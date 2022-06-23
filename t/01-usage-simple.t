@@ -4,10 +4,6 @@ use strict;
 use warnings;
 use Test::More;
 
-#TODO: Remove this debug code !!!
-use feature qw(say);
-use Mojo::Util qw(dumper);
-
 BEGIN {
     use_ok( 'Pod::Query' ) || print "Bail out!\n";
 }
@@ -133,7 +129,6 @@ my @cases = (
     },
 );
 
-# TODO: Tidy up after restructuring Pod::Query.
 $Pod::Query::MOCK_ROOT = 1;
 {
     no warnings 'redefine';
@@ -143,15 +138,12 @@ $Pod::Query::MOCK_ROOT = 1;
 for my $case ( @cases ) {
     pass "=== Starting $case->{pod_class} - $case->{name} ===";
 
-    # TODO: Tidy up after restructuring Pod::Query.
     {
         no warnings 'redefine';
         *Pod::Query::_mock_root = sub { $case->{lol} };
     }
 
     my $query = Pod::Query->new( $case->{pod_class} );
-
-    # say "query=" . dumper $query;
 
     # Parse and compare
     is_deeply( $query->{path}, "$class_dir/$case->{pod_class}.pm", "path", );

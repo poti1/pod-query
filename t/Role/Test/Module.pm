@@ -5,7 +5,6 @@ package Role::Test::Module;
 use Mojo::Base -role;
 use Test::More;
 
-#TODO: Remove this debug code !!!
 use feature qw(say);
 use Mojo::Util qw(dumper);
 
@@ -104,7 +103,6 @@ sub run {
             next;
         }
 
-        # say dumper [ $query->find_method( $case->{method} ) ];
         my $name = "find - $case->{name}";
 
         if ( ref $case->{find} ) {

@@ -3,13 +3,13 @@ package Pod::Query;
 use v5.24;    # Postfix defef :)
 use strict;
 use warnings;
-use File::Spec::Functions qw/ catfile /;
-use List::Util            qw/ first /;
-use Text::ParseWords      qw/ parse_line /;
-use Mojo::Base            qw/ -base /;
-use Mojo::Util            qw/ dumper class_to_path /;
-use Mojo::ByteStream      qw/ b/;
-use Term::ReadKey         qw/ GetTerminalSize /;
+use File::Spec::Functions qw( catfile );
+use List::Util qw( first );
+use Text::ParseWords qw( parse_line );
+use Mojo::Base qw( -base );
+use Mojo::Util qw( dumper class_to_path );
+use Mojo::ByteStream qw( b );
+use Term::ReadKey qw( GetTerminalSize );
 use Pod::Text();
 use Pod::LOL;
 
@@ -19,11 +19,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.19
+Version 0.20
 
 =cut
 
-our $VERSION                   = '0.19';
+our $VERSION                   = '0.20';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -768,11 +768,13 @@ sub _find {
                     say "next->{text}=$need->{text}";
                 }
 
-                if ( defined $try->{keep} ) {    # TODO; Why empty block?
-                    say "ENFORCING: keep" if $DEBUG_FIND;
-                }
-                elsif ( $try->{tag} =~ /$need->{tag}/
-                    and $try->{text} =~ /$need->{text}/ )
+                elsif (
+                        $try->{tag}  =~ /$need->{tag}/
+                    and $try->{text} =~ /$need->{text}/
+                    and not defined $try->{keep} # Already found the node.
+                                                 # Since nodes are checked again
+                                                 # on next call to _find.
+                  )
                 {
                     say "Found:  tag=$try->{tag}, text=$try->{text}"
                       if $DEBUG_FIND;
