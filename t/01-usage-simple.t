@@ -132,7 +132,8 @@ my @cases = (
 $Pod::Query::MOCK_ROOT = 1;
 {
     no warnings 'redefine';
-    *Pod::Query::_class_to_path = sub { "$class_dir/" . shift() . ".pm" };
+    *Pod::Query::_class_to_path =
+      sub { shift; "$class_dir/" . shift() . ".pm" };
 }
 
 for my $case ( @cases ) {

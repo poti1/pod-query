@@ -30,10 +30,11 @@ sub run {
     # TODO: Tidy up after restructuring Pod::Query.
     {
         no warnings qw( redefine once );
-        $Pod::Query::MOCK_ROOT      = 1;
-        *Pod::Query::_class_to_path = sub { "$class_dir/" . shift() . ".pm" };
+        $Pod::Query::MOCK_ROOT = 1;
+        *Pod::Query::_class_to_path =
+          sub { shift; "$class_dir/" . shift() . ".pm" };
         *Pod::Query::_mock_root     = sub { $obj->lol };
-        *Pod::Query::get_term_width = sub { 56 };    # Match android.
+        *Pod::Query::get_term_width = sub { 56 };          # Match android.
     }
 
     my $query = Pod::Query->new( $class );
