@@ -19,11 +19,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.20
+Version 0.21
 
 =cut
 
-our $VERSION                   = '0.20';
+our $VERSION                   = '0.21';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -42,6 +42,7 @@ has [
       path
       lol
       tree
+      class_is_path
       /
 ];
 
@@ -97,10 +98,11 @@ sub new {
 
     my $s = bless {
         pod_class => $pod_class,
-        path      => _class_to_path( $pod_class ),
         lol       => [],
         tree      => [],
     }, $class;
+
+    $s->path( $s->_class_to_path( $pod_class ) );
 
     return $s if $path_only or not $s->path;
 
@@ -134,7 +136,7 @@ Returns an empty string if there are any errors.
 =cut
 
 sub _class_to_path {
-    my ( $pod_class ) = @_;
+    my ( $s, $pod_class ) = @_;
     state %CACHE;
     my $path;
 
@@ -150,6 +152,17 @@ sub _class_to_path {
     for ( @INC ) {
         $path = catfile( $_, $partial_path );
         return $CACHE{$pod_class} = $path if $path and -f $path;
+    }
+
+    # Check for it in PATH also.
+    # Maybe pod_class is the path.
+    for ( split /:/, $ENV{PATH} ) {
+        $path = catfile( $_, $pod_class );
+        if ( $path and -f $path ) {
+            $path = $pod_class if $_ eq ".";    # Ignore current directory.
+            $s->class_is_path( 1 );
+            return $CACHE{$pod_class} = $path;
+        }
     }
 
     return "";
