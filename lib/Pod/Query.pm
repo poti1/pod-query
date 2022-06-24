@@ -19,11 +19,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.21
+Version 0.22
 
 =cut
 
-our $VERSION                   = '0.21';
+our $VERSION                   = '0.22';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -58,6 +58,8 @@ Query POD information from a file
    % perl -MPod::Query -E 'say Pod::Query->new("ojo")->find("head1[0]/Para[0]")'
 
    ojo - Fun one-liners with Mojo
+
+   % perl -MPod::Query -E 'say Pod::Query->new(shift)->find("head1[0]/Para[0]")' my.pod
 
 Find Methods:
 
@@ -130,6 +132,9 @@ sub new {
 
 Given a class name, returns the path to the pod file.
 Return value is cached (based on the class of the pod file).
+
+If the class is not found in INC, it will be checked whether
+the input is an existing file path.
 
 Returns an empty string if there are any errors.
 
