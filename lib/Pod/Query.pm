@@ -1,6 +1,6 @@
 package Pod::Query;
 
-use v5.24;                # Postfix defef :)
+use v5.24;    # Postfix defef :)
 use strict;
 use warnings;
 use File::Spec::Functions qw( catfile );
@@ -9,7 +9,7 @@ use Text::ParseWords      qw( parse_line );
 use Mojo::Base            qw( -base );
 use Mojo::Util            qw( dumper class_to_path );
 use Mojo::ByteStream      qw( b );
-use Term::Size::Any();    # chars().
+use Term::Size::Any       qw( chars );
 use Pod::Text();
 use Pod::LOL;
 
