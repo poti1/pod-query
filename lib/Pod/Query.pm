@@ -19,11 +19,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.23
+Version 0.24
 
 =cut
 
-our $VERSION                   = '0.23';
+our $VERSION                   = '0.24';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -127,7 +127,6 @@ sub new {
     $s;
 }
 
-
 =head2 _class_to_path
 
 Given a class name, returns the path to the pod file.
@@ -172,7 +171,6 @@ sub _class_to_path {
 
     return "";
 }
-
 
 =head2 _mock_root
 
@@ -296,7 +294,6 @@ sub _lol_to_tree {
     \@tree;
 }
 
-
 =head2 _define_heads_regex_table
 
 Generates the regexes for head elements inside
@@ -312,7 +309,6 @@ sub _define_heads_regex_table {
         $_ => [ map { qr/ ^ head ([$_]) $ /x } $inner, $outer ]
     } 1 .. 4;
 }
-
 
 =head2 _make_leaf
 
@@ -337,7 +333,6 @@ sub _make_leaf {
 
     $leaf;
 }
-
 
 =head2 _structure_over
 
@@ -382,7 +377,6 @@ sub _structure_over {
     \@struct;
 }
 
-
 =head2 find_title
 
 Extracts the title information.
@@ -393,7 +387,6 @@ sub find_title {
     my ( $s ) = @_;
     scalar $s->find( 'head1=NAME[0]/Para[0]' );
 }
-
 
 =head2 find_method
 
@@ -407,7 +400,6 @@ sub find_method {
 
     $s->find( sprintf '~head=~^%s\b.*$[0]**', $m );
 }
-
 
 =head2 find_method_summary
 
@@ -441,7 +433,6 @@ sub _clean_method_name {
     $clean;
 }
 
-
 =head2 find_events
 
 Extracts a list of events with a description.
@@ -454,7 +445,6 @@ sub find_events {
     my ( $s ) = @_;
     $s->find( '~head=EVENTS[0]/~head*/(Para)[0]' );
 }
-
 
 =head2 find
 
@@ -540,7 +530,6 @@ sub find {
 
     _render( $kept_all, @tree );
 }
-
 
 =head2 _query_string_to_struct
 
@@ -632,7 +621,6 @@ sub _query_string_to_struct {
     \@query_struct;
 }
 
-
 =head2 _check_conditions
 
 Check if queries are valid.
@@ -686,7 +674,6 @@ sub _check_conditions {
           and defined $section->{nth_in_group};
     }
 }
-
 
 =head2 _set_condition_defaults
 
@@ -742,7 +729,6 @@ sub _set_condition_defaults {
         }
     }
 }
-
 
 =head2 _find
 
@@ -857,7 +843,6 @@ sub _find {
     @found;
 }
 
-
 =head2 _invert
 
 Previous elements are inside of the child
@@ -913,7 +898,6 @@ sub _invert {
 
     @tree;
 }
-
 
 =head2 _render
 
@@ -998,7 +982,6 @@ sub get_term_width {
 
     $term_width;
 }
-
 
 =head1 SEE ALSO
 

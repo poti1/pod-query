@@ -5,7 +5,7 @@ package Role::Test::Module;
 use Mojo::Base -role;
 use Test::More;
 
-use feature qw(say);
+use feature    qw(say);
 use Mojo::Util qw(dumper);
 
 requires qw(
