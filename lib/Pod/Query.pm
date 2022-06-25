@@ -1,15 +1,15 @@
 package Pod::Query;
 
-use v5.24;    # Postfix defef :)
+use v5.24;                # Postfix defef :)
 use strict;
 use warnings;
 use File::Spec::Functions qw( catfile );
-use List::Util qw( first );
-use Text::ParseWords qw( parse_line );
-use Mojo::Base qw( -base );
-use Mojo::Util qw( dumper class_to_path );
-use Mojo::ByteStream qw( b );
-use Term::ReadKey qw( GetTerminalSize );
+use List::Util            qw( first );
+use Text::ParseWords      qw( parse_line );
+use Mojo::Base            qw( -base );
+use Mojo::Util            qw( dumper class_to_path );
+use Mojo::ByteStream      qw( b );
+use Term::Size::Any();    # chars().
 use Pod::Text();
 use Pod::LOL;
 
@@ -19,11 +19,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.22
+Version 0.23
 
 =cut
 
-our $VERSION                   = '0.22';
+our $VERSION                   = '0.23';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -991,7 +991,7 @@ sub get_term_width {
     state $term_width;
 
     if ( not $term_width ) {
-        ( $term_width ) = eval { GetTerminalSize() };
+        $term_width = eval { chars() };
         $term_width ||= 80;    # Safe default.
         $term_width--;         # Padding.
     }
