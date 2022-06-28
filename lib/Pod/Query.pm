@@ -19,11 +19,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.24
+Version 0.25
 
 =cut
 
-our $VERSION                   = '0.24';
+our $VERSION                   = '0.25';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -160,11 +160,12 @@ sub _class_to_path {
 
     # Check for it in PATH also.
     # Maybe pod_class is the path.
-    for ( split /:/, $ENV{PATH} ) {
-        $path = catfile( $_, $pod_class );
+    for ( "", split /:/, $ENV{PATH} ) {
+
+        # Absolute path or current folder means class is path.
+        $path = ( $_ and $_ ne "." ) ? catfile( $_, $pod_class ) : $pod_class;
         if ( $path and -f $path ) {
-            $path = $pod_class if $_ eq ".";    # Ignore current directory.
-            $s->class_is_path( 1 );
+            $s->class_is_path( 1 ) if ref $s;
             return $CACHE{$pod_class} = $path;
         }
     }
