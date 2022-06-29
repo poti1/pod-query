@@ -16,11 +16,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.26
+Version 0.28
 
 =cut
 
-our $VERSION                   = '0.26';
+our $VERSION                   = '0.28';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -121,13 +121,15 @@ _has qw(
 
 sub _dumper {
     require Data::Dumper;
-    say Data::Dumper
+    my $data = Data::Dumper
       ->new( [@_] )
-      ->Terse( 1 )
       ->Indent( 1 )
       ->Sortkeys( 1 )
-      ->Purity( 1 )
+      ->Terse( 1 )
+      ->Useqq( 1 )
       ->Dump;
+    return $data if defined wantarray;
+    say $data;
 }
 
 =head2 new
