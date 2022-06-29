@@ -2,7 +2,7 @@
 use v5.16;
 use strict;
 use warnings;
-use Test::More;
+use Test::More tests => 6;
 use File::Spec::Functions qw( catfile );
 use FindBin               qw( $RealDir );
 
@@ -48,7 +48,4 @@ for my $case ( @cases ) {
 
     like( $got, $expect, "Correct class for $class" );
 }
-
-
-done_testing( 6 );
 
