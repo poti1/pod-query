@@ -16,11 +16,11 @@ Pod::Query - Query pod documents
 
 =head1 VERSION
 
-Version 0.28
+Version 0.29
 
 =cut
 
-our $VERSION                   = '0.28';
+our $VERSION                   = '0.29';
 our $DEBUG_LOL_DUMP            = 0;
 our $DEBUG_STRUCT_OVER         = 0;
 our $DEBUG_TREE                = 0;
@@ -108,12 +108,14 @@ Flag to indicate if the class is really a path to the file.
 
 =cut
 
-_has qw(
-  path
-  lol
-  tree
-  class_is_path
-);
+sub import {
+    _has qw(
+      path
+      lol
+      tree
+      class_is_path
+    );
+}
 
 #
 # Debug
