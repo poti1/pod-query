@@ -1,5 +1,7 @@
 Revision history for Pod-Query
 
+0.35
+        2022-10-02 - Attempt to lower perl version.
 0.34    2022-10-01 - Added bugtracker resources.
 0.01    Date/time
         First version, released on an unsuspecting world.
