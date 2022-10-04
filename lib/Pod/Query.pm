@@ -690,27 +690,27 @@ sub _check_conditions {
 
     my $error_message = <<'ERROR';
 
-   Invalid input: expecting a hash reference!
+    Invalid input: expecting a hash reference!
 
-   Syntax:
+    Syntax:
 
-      $pod->find( 'QUERY' )         # As explained in _query_string_to_struct().
+        $pod->find( 'QUERY' )         # As explained in _query_string_to_struct().
 
-      # OR:
+        # OR:
 
-      $pod->find(
-         # section1
-         {
-            tag          => "TAG",  # Search to look for.
-            text         => "TEXT", # Text of the tag to find.
-            keep         => 1,      # Must only be in last section.
-            keep_all     => 1,      # Keep this tag and sub tags.
-            nth          => 0,      # Stop searching after find so many matches.
-            nth_in_group => 0,      # Nth only in the current group.
-         },
-         # ...
-         # conditionN
-      );
+        $pod->find(
+            # section1
+            {
+                tag          => "TAG",  # Search to look for.
+                text         => "TEXT", # Text of the tag to find.
+                keep         => 1,      # Must only be in last section.
+                keep_all     => 1,      # Keep this tag and sub tags.
+                nth          => 0,      # Stop searching after find so many matches.
+                nth_in_group => 0,      # Nth only in the current group.
+            },
+            # ...
+            # conditionN
+        );
 ERROR
 
     die "$error_message"
