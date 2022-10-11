@@ -92,7 +92,7 @@
 # Avoid archives of this distribution
 \bPod-Query-[\d\.\_]+
 
-^TODO$
+\bTODO$
 
 # Avoid git flow
 /.github/workflows/ci\.yml$
