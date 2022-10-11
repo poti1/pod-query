@@ -92,6 +92,7 @@
 # Avoid archives of this distribution
 \bPod-Query-[\d\.\_]+
 
+# Avoid TODO
 \bTODO$
 
 # Avoid git flow
