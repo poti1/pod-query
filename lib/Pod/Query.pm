@@ -874,7 +874,11 @@ sub _find {
                 say "Got kids and nothing yet in queue" if $DEBUG_FIND;
                 unshift @tries, @{$try->{kids}};    # Process kids tags.
                 if ( $try->{keep} and not $locked_prev++ ) {
-                    unshift @prev, { %{$try}{qw/tag text keep/} };
+                    unshift @prev,
+                        {
+                            map { $_ => $try->{$_} }
+                            qw/tag text keep/
+                        };
                     say "prev changed: ", _dumper \@prev if $DEBUG_FIND;
                 }
                 say "locked_prev: $locked_prev" if $DEBUG_FIND;
