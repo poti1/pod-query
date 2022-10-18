@@ -327,7 +327,7 @@ sub _lol_to_tree {
 
     say "\n_ROOT_TO_TREE()" if $DEBUG_TREE;
 
-    for ( $lol->@* ) {
+    for ( @$lol ) {
         say "\n_=", _dumper $_ if $DEBUG_TREE;
 
         my $leaf = _make_leaf( $_ );
@@ -338,11 +338,11 @@ sub _lol_to_tree {
             $push->();
             $node = $leaf;
             if ( $leaf->{tag} =~ /$is_head/ ) {
-                ( $is_in, $is_out ) = $heads_table{$1}->@*;
+                ( $is_in, $is_out ) = @{$heads_table{$1}};
             }
         }
         else {
-            push $node->{kids}->@*, $leaf;
+            push @{$node->{kids}}, $leaf;
             say "node: ", _dumper $node if $DEBUG_TREE;
         }
     }
@@ -563,7 +563,7 @@ sub find {
     say "DEBUG_FIND_AFTER_DEFAULTS " . _dumper $find_conditions
       if $DEBUG_FIND_AFTER_DEFAULTS;
 
-    my @tree = $s->tree->@*;
+    my @tree = @{$s->tree};
     my $kept_all;
     if ( $DEBUG_PRE_FIND_DUMP ) {
         say "DEBUG_PRE_FIND_DUMP: " . _dumper \@tree;
@@ -872,7 +872,7 @@ sub _find {
 
             if ( $try->{kids} and not @found_in_group ) {
                 say "Got kids and nothing yet in queue" if $DEBUG_FIND;
-                unshift @tries, $try->{kids}->@*;    # Process kids tags.
+                unshift @tries, @{$try->{kids}};    # Process kids tags.
                 if ( $try->{keep} and not $locked_prev++ ) {
                     unshift @prev, { %$try{qw/tag text keep/} };
                     say "prev changed: ", _dumper \@prev if $DEBUG_FIND;
@@ -1004,7 +1004,7 @@ sub _render {
             }
 
             if ( $try->{kids} ) {
-                unshift @tries, $try->{kids}->@*;
+                unshift @tries, @{$try->{kids}};
                 if ( $DEBUG_RENDER ) {
                     say "Got kids";
                     say "tries:  ", _dumper \@tries;
