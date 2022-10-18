@@ -926,7 +926,10 @@ sub _invert {
     my %navi;
 
     for my $group ( @groups ) {
-        push @tree, { %$group{qw/ tag text keep kids /} };
+        push @tree, {
+            map { $_ => $group->{$_} }
+            qw/ tag text keep kids /
+        };
         if ( $DEBUG_INVERT ) {
             say "\nInverting: group=", _dumper $group;
             say "tree: ",              _dumper \@tree;
