@@ -21,7 +21,7 @@ requires:
   Pod::LOL: '0.08'
   Role::Tiny: '2.002004'
   Term::Size::Any: '0.002'
-  perl: '5.016'
+  perl: '5.018'
 resources:
   bugtracker: https://github.com/poti1/pod-query/issues
   license: http://opensource.org/licenses/artistic-license-2.0.php
